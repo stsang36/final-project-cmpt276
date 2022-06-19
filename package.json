@@ -1,0 +1,18 @@
+{
+  "name": "cmpt-276",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "(cd backend && npm install); (cd client && npm install)",
+    "server": "npm run server --prefix backend",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^7.2.2"
+  }
+}
