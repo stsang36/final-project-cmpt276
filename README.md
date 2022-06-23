@@ -36,11 +36,6 @@ limits: 100 emails/ day
 https://discord.js.org
 limits: 50 requests per second per bot
 
-**GOOGLE DRIVE:**
-https://developers.google.com/drive/api
- limits: 1,000,000,000 requests/day.
-
-
 # scripts to get started (development purposes only)
 #### npm i
 *~run this in the root folder to install all depenedencies for backend and client (must do this before running any other commands)*
