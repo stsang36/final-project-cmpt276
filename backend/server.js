@@ -1,6 +1,7 @@
 const express = require('express')
 const dotenv = require('dotenv')
 dotenv.config({path: '../.env'})
+const { errorHandler } = require('./middleware/errorMiddleware')
 
 // start up app 
 const app = express()
@@ -11,7 +12,8 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
 // routes
-// example route remove as necessary
-app.use('/exampleRoute', require('./routes/exampleRoutes'))
+app.use('/api/user', require('./routes/userRoutes'))
+
+app.use(errorHandler)
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
