@@ -1,5 +1,6 @@
 const express = require('express')
 const dotenv = require('dotenv')
+const loginRoute = require('./routes/loginRoutes')
 dotenv.config({path: '../.env'})
 const { errorHandler } = require('./middleware/errorMiddleware')
 const cors = require('cors')
