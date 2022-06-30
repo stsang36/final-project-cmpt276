@@ -1,6 +1,14 @@
-// handles all functions that are called in the route 'exampleRoutes', delete later
+// handles all functions that are called in the login route
+const express = require('express');
+const app = express();
+const path = require('path');
 
-const loginGetFunction = async (req, res) => {
+const frontend = path.join(__dirname, '..', '..', 'client')
+
+app.use(express.static(frontend + '/public'));
+
+
+const loginGetFunction = (req, res) => {
     // insert get function here 
     console.log('login get function called')
 
@@ -11,13 +19,27 @@ const loginGetFunction = async (req, res) => {
   
 const loginPostFunction = async (req, res) => {
     // insert post function here
-    console.lost('login post function called')
+    console.log('login post function called')
     res.status(200).send({message: 'success'})
     
+    return;
+}
+
+const registerGetFunction = (req, res) => {
+    console.log('register get function called');
+    res.status(200).send({message: 'success'})
+    return;
+}
+
+const registerPostFunction = async (req, res) => {
+    console.log('register post function called')
+    res.status(200).send({message: 'success'})
     return;
 }
   
 module.exports = { 
     loginGetFunction, 
-    loginPostFunction
+    loginPostFunction,
+    registerGetFunction,
+    registerPostFunction
 }
