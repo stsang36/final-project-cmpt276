@@ -1,13 +1,12 @@
 const express = require('express')
 const dotenv = require('dotenv')
-const loginRoute = require('./routes/loginRoutes')
 dotenv.config({path: '../.env'})
 const { errorHandler } = require('./middleware/errorMiddleware')
 const cors = require('cors')
 
 // start up app 
 const app = express()
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 5000
 
 // middleware for handling requests
 app.use(express.json())
