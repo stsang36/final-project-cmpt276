@@ -8,7 +8,7 @@ const {
   updateUserRole,
 } = require('../controllers/userController')
 
-router.route('/').get(protect, getAllUsers).post(registerUser).put(protect, updateUserRole)
+router.route('/').get( getAllUsers).post(registerUser).put(protect, updateUserRole)
 
 router.route('/login').post(loginUser)
 
