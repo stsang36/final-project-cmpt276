@@ -67,7 +67,7 @@ const deleteFile = async (req, res) => {
     } catch (error) {
         console.log(error)
 
-        if (!error.code.isNaN) {
+        if (error.code.isNaN) {
             res.status = 400;
         } else {
             res.status = error.code;
@@ -118,7 +118,7 @@ const getFile = async (req, res) => {
     } catch (error) {
         console.log(error);
 
-        if (!error.code.isNaN) {
+        if (error.code.isNaN) {
             res.status = 400;
         } else {
             res.status = error.code;
