@@ -38,7 +38,7 @@ const uploadFile = async(req, res) => {
 const deleteFile = async(req, res) => {
     try {
         const fileId = req.body.fileId;
-        const userID = req.body.userId;
+        //const userID = req.body.userId;
 
         //uses userID to verify user on userdb, if not authorized, send 400
 

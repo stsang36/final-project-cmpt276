@@ -7,9 +7,9 @@ const {
   getFile
 } = require('../controllers/fileController')
 
-router.route('/uploadFile').post(protect, uploadFile)
-router.route('/deleteFile').post(protect, deleteFile)
-router.route('/getFile').get(protect, getFile)
+router.route('/uploadFile').post(uploadFile)
+router.route('/deleteFile').post(deleteFile)
+router.route('/getFile').get(getFile)
 
 
 
