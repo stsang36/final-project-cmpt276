@@ -49,3 +49,10 @@ table {
 }
 
 /* GLOBAL CSS STARTS HERE */
+.App
+{
+    background-image:url('./pages/auth/components/LoginCard/assets/background.png');
+    background-size:'cover';
+    height: 100vh;
+    background-repeat: no-repeat;
+}
