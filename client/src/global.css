@@ -51,8 +51,9 @@ table {
 /* GLOBAL CSS STARTS HERE */
 .App
 {
-    background-image:url('./pages/auth/components/LoginCard/assets/background.png');
+    background-image:url('./assets/images/background.png');
     background-size:'cover';
+    background-position: 'center';
     height: 100vh;
     background-repeat: no-repeat;
 }

@@ -3,6 +3,7 @@ const dotenv = require('dotenv')
 dotenv.config({path: '../.env'})
 const { errorHandler } = require('./middleware/errorMiddleware')
 const cors = require('cors')
+const stream = require('stream')
 
 // start up app 
 const app = express()

@@ -1,10 +1,8 @@
 // LoginCard.jsx
-
 import PropTypes from 'prop-types'
 import style from './style.module.css'
-import image from './assets/login-green.png'
-
-import LoginForm from './LoginForm'
+import image from '../assets/login-green.png'
+import LoginForm from '../LoginForm'
 
 const LoginCard = ( {title, onLogin} ) => 
 {

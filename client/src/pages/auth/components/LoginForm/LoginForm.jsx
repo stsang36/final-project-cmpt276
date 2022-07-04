@@ -1,8 +1,8 @@
 import style from './style.module.css'
-import logo from './assets/logo.png'
-import Button from './Button'
-import Register from './Register'
-import Recover from './Recover'
+import logo from '../assets/logo.png'
+import Button from 'common/components/Button'
+import Register from '../RegisterCard'
+import Recover from '../RecoverCard'
 import { useState } from 'react'
 
 const LoginForm = ( {title, onLogin} ) => 
@@ -41,7 +41,7 @@ const LoginForm = ( {title, onLogin} ) =>
                 <input  className={style.form}
                         type='email' 
                         placeholder='Email Address'
-                        vaule={email}
+                        value={email}
                         onChange={(event) => setEamil(event.target.value)}
                 />
             </div>
@@ -49,7 +49,7 @@ const LoginForm = ( {title, onLogin} ) =>
                 <input  className={style.form}
                         type='password' 
                         placeholder='Password'
-                        vaule={password}
+                        value={password}
                         onChange={(event) => setPW(event.target.value)}
                 />
             </div>
