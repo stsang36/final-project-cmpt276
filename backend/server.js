@@ -6,7 +6,7 @@ const cors = require('cors')
 
 // start up app 
 const app = express()
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT
 
 // middleware for handling requests
 app.use(express.json())
