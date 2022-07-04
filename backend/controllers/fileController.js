@@ -10,14 +10,14 @@ const uploadFile = async (req, res) => {
         const file = req.body.file
         const fileName = req.body.fileName
         const fileExt = req.body.fileType
-        const status = req.body.status
+        const fileStatus = req.body.fileStatus
 
         const newFile = file.toString('base64')
         const newBuf = Buffer.from(newFile, 'base64')
         const myDate = new Date(Date.now()).toISOString();
         const query = {
             text: 'INSERT into file(name, type, status, created_At, media) VALUES ($1, $2, $3, $4, $5)',
-            values: [fileName, fileExt, status, myDate, newBuf]
+            values: [fileName, fileExt, fileStatus, myDate, newBuf]
         }
         await pool.query(query)
         res.status(200).send('File uploaded successfully, great success!')
