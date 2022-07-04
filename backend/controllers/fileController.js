@@ -14,10 +14,9 @@ const uploadFile = async (req, res) => {
 
         const newFile = file.toString('base64')
         const newBuf = Buffer.from(newFile, 'base64')
-        const myDate = new Date(Date.now()).toISOString();
         const query = {
-            text: 'INSERT into file(name, type, status, created_At, media) VALUES ($1, $2, $3, $4, $5)',
-            values: [fileName, fileExt, fileStatus, myDate, newBuf]
+            text: 'INSERT into file(name, type, status, created_At, media) VALUES ($1, $2, $3, $4)',
+            values: [fileName, fileExt, fileStatus, newBuf]
         }
         await pool.query(query)
         res.status(200).send('File uploaded successfully, great success!')
@@ -30,40 +29,51 @@ const uploadFile = async (req, res) => {
 const deleteFile = async (req, res) => {
     try {
         const fileId = req.body.fileId;
-        const role = req.body.role;
+        const role = req.body.role; // this might be a security vulnurability because what if an employee sends bad POST request?
 
         if (role !== 'admin') {
-            throw new Error('Not Authorized')
+            const error = new Error('You are not authorized to delete files')
+            error.code = 401
+            throw error
         }
 
-        query = {
+        const findQuery = {
             text: 'SELECT * FROM file WHERE id = $1',
-            values: [fileId]
+            values: [findQuery]
         }
 
         fileResult = await pool.query(query)
 
         if (fileResult.rows.length === 0) {
-            throw new Error('File not found')
+            const error = new Error(`File with id ${fileId} not found`)
+            error.code = 404
+            throw error
         }
 
-        query = {
+        const deleteQuery = {
             text: 'DELETE FROM file WHERE id = $1',
             values: [fileId]
         }
 
-        await pool.query(query)
+        await pool.query(deleteQuery)
 
         res.status(200).send(`ID: ${fileId} ${fileResult.rows[0].name}.${fileResult.rows[0].type} deleted.`)
     } catch (error) {
         console.log(error)
-        res.status(400).send(`${error}`)
+       
+        if (!error.code.isNaN) {
+            res.status = 400;
+            } else {
+                res.status = error.code;
+            }
+
+        res.send(`${error}`)
     }
 }
 
 const getFile = async (req, res) => {
     try {
-        const fileId = req.query.fileId;
+        const fileId = req.params['id']; //id should be fileID
 
         const getDataQuery = {
             text: 'SELECT * FROM file WHERE id = $1',
@@ -73,7 +83,9 @@ const getFile = async (req, res) => {
         const data = await pool.query(getDataQuery)
 
         if (data.rows.length === 0) {
-            throw new Error('File not found')
+            const error = new Error(`File with id ${fileId} not found`)
+            error.code = 404
+            throw error
         }
 
         // pipe donwload automtically, and redirects to previous path
@@ -94,7 +106,14 @@ const getFile = async (req, res) => {
         res.status(200)
     } catch (error) {
         console.log(error);
-        res.status(400).send(`${error}`)
+
+        if (!error.code.isNaN) {
+        res.status = 400;
+        } else {
+            res.status = error.code;
+        }
+
+        res.send(`${error}`)
     }
 }
 
