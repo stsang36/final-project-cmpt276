@@ -1,9 +1,11 @@
-const {
-    pool
-} = require('../config/pool.js')
+const { pool } = require('../config/pool.js')
 const stream = require('stream')
 require('express-async-errors')
 
+// @route:  POST /api/file
+// @desc:   uploads a new file to 'file' table
+// @body:   obj w/ file, fileName, fileType, and fileStatus
+// @access: PRIVATE
 const uploadFile = async (req, res) => {
 
     try {
@@ -14,11 +16,11 @@ const uploadFile = async (req, res) => {
 
         const newFile = file.toString('base64')
         const newBuf = Buffer.from(newFile, 'base64')
-        const query = {
+        const insertQuery = {
             text: 'INSERT into file(name, type, status, created_At, media) VALUES ($1, $2, $3, $4)',
             values: [fileName, fileExt, fileStatus, newBuf]
         }
-        await pool.query(query)
+        await pool.query(insertQuery)
         res.status(200).send('File uploaded successfully, great success!')
     } catch (error) {
         console.log(error)
@@ -26,6 +28,10 @@ const uploadFile = async (req, res) => {
     }
 }
 
+// @route:  DELETE /api/file
+// @desc:   deletes file from the 'file' table
+// @body:   obj w/ fileID, role
+// @access: PRIVATE (ADMIN ONLY)
 const deleteFile = async (req, res) => {
     try {
         const fileId = req.body.fileId;
@@ -39,10 +45,10 @@ const deleteFile = async (req, res) => {
 
         const findQuery = {
             text: 'SELECT * FROM file WHERE id = $1',
-            values: [findQuery]
+            values: [fileId]
         }
 
-        fileResult = await pool.query(query)
+        fileResult = await pool.query(findQuery)
 
         if (fileResult.rows.length === 0) {
             const error = new Error(`File with id ${fileId} not found`)
@@ -60,17 +66,21 @@ const deleteFile = async (req, res) => {
         res.status(200).send(`ID: ${fileId} ${fileResult.rows[0].name}.${fileResult.rows[0].type} deleted.`)
     } catch (error) {
         console.log(error)
-       
+
         if (!error.code.isNaN) {
             res.status = 400;
-            } else {
-                res.status = error.code;
-            }
+        } else {
+            res.status = error.code;
+        }
 
         res.send(`${error}`)
     }
 }
 
+// @route:  GET /api/file/:id
+// @desc:   retrieves a file from the 'file' table
+// @body:   obj w/ id (fileID)
+// @access: PRIVATE (Employees ONLY)
 const getFile = async (req, res) => {
     try {
         const fileId = req.params['id']; //id should be fileID
@@ -103,12 +113,13 @@ const getFile = async (req, res) => {
         // set content type accordingly
         res.set('content-type', `application/${fileType}`)
         readStream.pipe(res)
+
         res.status(200)
     } catch (error) {
         console.log(error);
 
         if (!error.code.isNaN) {
-        res.status = 400;
+            res.status = 400;
         } else {
             res.status = error.code;
         }
