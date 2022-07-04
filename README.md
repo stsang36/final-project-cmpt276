@@ -46,3 +46,4 @@ limits: 50 requests per second per bot
 #### npm run client
 *~run this command to run the client on port 3000*
 
+remember to run "heroku ps:scale web=1" to turn app on in heroku
