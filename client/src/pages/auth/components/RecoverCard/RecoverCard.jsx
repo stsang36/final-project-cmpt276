@@ -1,8 +1,12 @@
-import React from 'react'
+import style from './style.module.css'
+import { Link } from 'react-router-dom'
 
 const RecoverCard = () => {
   return (
-    <div>RecoverCard</div>
+    <p className={style.recover}>
+        <Link to="/auth/recover">Forgot Password?</Link>
+    </p>
+
   )
 }
 

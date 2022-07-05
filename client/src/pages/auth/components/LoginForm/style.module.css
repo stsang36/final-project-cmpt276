@@ -1,0 +1,56 @@
+
+.fieldset
+{
+    background-color: white;
+    float: left;
+    display: block;
+    width:4 5%;
+    height: 503px;
+    margin: 130px 0 0 0px;
+    border-top-right-radius: 3%;
+    border-bottom-right-radius: 3%;
+    border-color: transparent;
+    width: 426px;
+    box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+    text-align: right;
+}
+
+.logo
+{
+    box-shadow: none;
+    filter: drop-shadow(0px, 4px, 10px, black);
+    display: inline;
+    float: left;
+    margin: 35px 0 5px 70px;
+    width: 36pt;
+}
+
+.title
+{
+    display: inline;
+    float: left;
+    margin: 35px 0 0 5px;
+    width: 52px;
+    text-shadow: 0 2px 10px rgb(145, 145, 145);
+    font-size: 33pt;
+}
+
+.form
+{
+    position: relative;
+    width: 310px;
+    height: 40px;
+    top: -20px;
+    right: 50px;
+    margin: 40px 0 0 -65px;
+    padding-left: 15pt;
+    border-color: transparent;
+    border-radius: 7px;
+    box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+    letter-spacing: 1.5pt;
+}
+
+::placeholder
+{
+    color: rgb(141, 141, 141);
+}
