@@ -3,10 +3,12 @@ import style from './style.module.css'
 import { Outlet } from 'react-router-dom'
 
 
-const AuthContainer = ({outlet}) => {
+const AuthContainer = () => {
   return (
-    <Layout title={'Authentication Page'}>
-      <Outlet/>
+    <Layout>
+      <div className={style.authContainer}>
+        <Outlet/>
+      </div>
     </Layout>
   )
 }

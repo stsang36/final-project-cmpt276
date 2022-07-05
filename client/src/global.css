@@ -49,11 +49,26 @@ table {
 }
 
 /* GLOBAL CSS STARTS HERE */
-.App
-{
-    background-image:url('./assets/images/background.png');
-    background-size:'cover';
-    background-position: 'center';
-    height: 100vh;
-    background-repeat: no-repeat;
+
+/* FONT IMPORTS */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap');
+
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+.app{
+    background-image:url('./assets/images/background.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    /* background: lightblue; */
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    font-family: 'Roboto', Helvetica, sans-serif
+}
+
+

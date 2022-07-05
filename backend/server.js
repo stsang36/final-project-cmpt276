@@ -4,6 +4,7 @@ dotenv.config({path: '../.env'})
 const { errorHandler } = require('./middleware/errorMiddleware')
 const cors = require('cors')
 const stream = require('stream')
+const path = require('path')
 
 // start up app 
 const app = express()
@@ -17,6 +18,15 @@ app.use(cors())
 // routes
 app.use('/api/user', require('./routes/userRoutes'))
 app.use('/api/file', require('./routes/fileRoutes'))
+
+//  Serve Frontend
+if(process.env.NODE_ENV === 'production'){
+  app.use(express.static(path.join(__dirname, '../client/build')))
+
+  app.get('*', (req, res) => res.sendFile(path.resolve(__dirname, '../', 'client', 'build', 'index.html')))
+} else {
+  app.get('/', (req, res) => res.send('Please set environment variable to production'))
+}
 
 app.use(errorHandler)
 

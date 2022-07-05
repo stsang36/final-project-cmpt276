@@ -21,7 +21,6 @@ const authSlice = createSlice({
     builder.addMatcher(
       serverApi.endpoints.login.matchFulfilled,
       (state, {payload}) => {
-        console.log('here')
         const { token, ...user } = payload
         sessionStorage.setItem('auth', JSON.stringify({
           user: user,

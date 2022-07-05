@@ -3,8 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 export const serverApi = createApi({
   reducerPath: 'serverApi',
   baseQuery: fetchBaseQuery({
-    // change base url to '/api' when in production 
-    baseUrl: 'http://localhost:5000/api' 
+    baseUrl: '/api' 
   }),
   tagTypes: ['Job'],
   endpoints: (builder) => ({
