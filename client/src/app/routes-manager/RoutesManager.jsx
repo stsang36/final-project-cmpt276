@@ -7,7 +7,7 @@ const RoutesManager = () => {
     <Routes>
       <Route path='/' element={<div>SIGNED IN</div>}/>
       <Route path="auth" element={<AuthContainer />}>
-        <Route path='login' element={<LoginCard />}/>
+        <Route path='login' element={<LoginCard />} />
       </Route>
     </Routes>
   )

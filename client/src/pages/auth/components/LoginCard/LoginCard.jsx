@@ -1,7 +1,7 @@
 // LoginCard.jsx
 import style from './style.module.css'
 import image from '../assets/login-green.png'
-import LoginForm from '../LoginForm'
+import LoginForm from '../LoginForm/LoginForm'
 
 const LoginCard = () => {
 
