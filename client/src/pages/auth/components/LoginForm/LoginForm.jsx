@@ -3,85 +3,90 @@
 import style from './style.module.css'
 import logo from '../assets/logo.png'
 import Button from 'common/components/Button'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { useLoginMutation } from 'redux/apis/serverApi'
 
-const LoginForm = ( {title, onLogin} ) => 
-{
-  const [email, setEamil] = useState('')
-  const [password, setPW] = useState('')
+const LoginForm = () => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [ login, results ] = useLoginMutation()
+  const navigate = useNavigate()
 
-  const onClick = () => 
-  {
-    console.log('Click')
-  }
-
-  const onSubmit = (event) =>
-  {
-    event.preventDefault()
-
-    if(!email)
-    {
-        alert('Please insert a valid email')
-        return
+  const handleKeyPress = (event) => {
+    if(event.key === 'Enter'){
+      onSubmit()
     }
-
-    onLogin( {email, password} )
-    
-    setEamil('')
-    setPW('')
   }
+  const onSubmit = () => {
+    if(!username || !password){
+      toast.warn('Please fill in all required fields')
+      return
+    }
+    login({username, password})
+  }
+
+  useEffect(() => {
+    const { isSuccess, isError, error } = results
+    if(isSuccess){
+      toast.success('Signed In Successfully')
+      navigate('/')
+    }
+    if(isError){
+      toast.error(`An error occured: ${error.data.message}`)
+    }
+  },[results])
 
   return (
-    <form action="" onSubmit={onSubmit}>
-      <fieldset className={style.fieldset}>
+    <div className={style.form}>
+      <div className={style.header}>
         <img src={logo} className={style.logo} alt="Bytetools Logo" />
-          <h1 className={style.title}> {title} </h1>
-            <h6 className = {style.register}>
-              New to Bytetools?&nbsp;&nbsp;
-              <Link to="/auth/register">Create account</Link>
-            </h6>
-            <div>
-                <input  className={style.form}
-                        type='email' 
-                        placeholder='Email Address'
-                        value={email}
-                        onChange={(event) => setEamil(event.target.value)}
-                />
-            </div>
-            <div>
-                <input  className={style.form}
-                        type='password' 
-                        placeholder='Password'
-                        value={password}
-                        onChange={(event) => setPW(event.target.value)}
-                />
-            </div>
-            <p className={style.recover}>
-              <Link to="/auth/recover">Forgot Password?</Link>
-            </p>
-            <Button text='Log in' 
-                    onClick={onClick} 
-                    style=
-                    {
-                      {
-                        position: 'relative',
-                        top: '90px',
-                        right: '93px',
-                        width: '250px',
-                        height: '40px',
-                        borderColor: 'transparent',
-                        borderRadius: '15px',
-                        backgroundColor: 'rgb(0, 168, 0)',
-                        color: 'rgb(46, 46, 46)',
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        boxShadow: '0px 5px 20px 3px rgba(126, 126, 126, 0.5)',
-                      }
-                    }
-            />
-      </fieldset>
-    </form>
+        <h1 className={style.h1}>Bytetools</h1>
+      </div>
+      <div className={style.fieldset}>
+        <div className={style.username}>
+          <p className={style.p}>
+            New to Bytetools? 
+            <Link 
+              to='/auth/register'
+              className={style.a}
+            >
+              Create Account 
+            </Link>
+          </p>
+          <input  
+            className={style.input}
+            type='username' 
+            placeholder='Username'
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+        </div>
+        <div className={style.password}>
+          <input  
+            className={style.input}
+            type='password' 
+            placeholder='Password'
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <Link
+            to='/auth/recover'
+            className={style.a}
+          >
+            Forgot Password?
+          </Link>
+        </div>
+      </div>
+      <Button 
+        className={style.button}
+        text='Log in' 
+        onClick={onSubmit}
+      />
+    </div>
   )
 }
 

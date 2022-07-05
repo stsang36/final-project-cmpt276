@@ -1,42 +1,4 @@
-/* client/src/pages/auth/components/LoginForm/style.module.css */
-
-.fieldset
-{
-    background-color: white;
-    float: left;
-    display: block;
-    width:4 5%;
-    height: 503px;
-    margin: 130px 0 0 0px;
-    border-top-right-radius: 3%;
-    border-bottom-right-radius: 3%;
-    border-color: transparent;
-    width: 426px;
-    box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
-    text-align: right;
-}
-
-.logo
-{
-    box-shadow: none;
-    filter: drop-shadow(0px, 4px, 10px, black);
-    display: inline;
-    float: left;
-    margin: 35px 0 5px 70px;
-    width: 36pt;
-}
-
-.title
-{
-    display: inline;
-    float: left;
-    margin: 35px 0 0 5px;
-    width: 52px;
-    text-shadow: 0 2px 10px rgb(145, 145, 145);
-    font-size: 33pt;
-}
-
-.form
+/* .form
 {
     position: relative;
     width: 310px;
@@ -49,31 +11,104 @@
     border-radius: 7px;
     box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
     letter-spacing: 1.5pt;
+    background: white;
 }
 
-.register
-{
-    color: grey;
-    letter-spacing: 0.8pt;
-    display: inline;
-    text-align: center;
-    float: left;
-    margin: 130px 0 0 -70px;
-}
-
-.recover
-{
-    position: relative;
-    color: grey;
-    font-size: 6pt;
-    letter-spacing: 0.8pt;
-    display: inline;
-    text-align: center;
-    float: left;
-    margin: -14px 0 0 270px;
-}
 
 ::placeholder
 {
     color: rgb(141, 141, 141);
+} */
+
+.form{
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  width: 50%;
+  margin: 0.5rem 0;
+  border-radius: 0 10px 10px 0;
+  background: white;
+  box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+}
+
+.header{
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 0.5rem;
+  margin-right: 2.5rem;
+}
+
+.h1{
+  font-size: 2rem;
+}
+
+.logo{
+  width: 2rem;
+}
+
+.fieldset{
+  padding: 2rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.username{
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.username .p{
+  font-size: 0.9rem;
+  align-self: center;
+  opacity: 0.7;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.username .p .a{
+  opacity: 1;
+}
+
+.password{
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.password .a{
+  align-self: flex-end;
+  font-size: 0.8rem;
+  margin-right: 1rem;
+}
+
+.input{
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+  border: none;
+  border-radius: 7px;
+}
+
+.input::placeholder{
+  color: rgb(141, 141, 141);
+}
+
+.button{
+  background-color: rgb(0, 168, 0);
+  color: rgb(46, 46, 46);
+  font-size: 18px;
+  font-weight: bold;
+  box-shadow: 0px 5px 20px 3px rgba(126, 126, 126, 0.5);
+  border: none;
+  border-radius: 1rem;
+  padding: 0.5rem 5rem;
 }

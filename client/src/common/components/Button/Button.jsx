@@ -1,22 +1,14 @@
-import PropTypes from 'prop-types'
+import style from './style.module.css'
 
-const Button = ({text, onClick, style}) => 
+const Button = ({text, onClick, className}) => 
 {
   return (
-    <input  type='submit' 
-            onClick={onClick} 
-            value={text}
-            style={style}
-    />
+    <button 
+      className={`${style.button} ${className}`}
+      onClick={onClick}>
+      {text}
+    </button>
   )
-}
-
-Button.defaultProps = {text: 'Log in'}
-
-Button.propTypes = 
-{
-  text: PropTypes.string.isRequired,
-  onClick: PropTypes.func
 }
 
 export default Button

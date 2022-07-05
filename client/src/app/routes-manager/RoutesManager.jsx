@@ -7,6 +7,7 @@ import RecoverCard from 'pages/auth/components/RecoverCard'
 const RoutesManager = () => {
   return (
     <Routes>
+      <Route path='/' element={<div>SIGNED IN</div>}/>
       <Route path="auth" element={<AuthContainer />}>
         <Route path='login' element={<LoginCard />} />
         <Route path='register' element={<RegisterCard />} />
