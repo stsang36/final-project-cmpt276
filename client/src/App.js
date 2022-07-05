@@ -4,7 +4,7 @@ import RoutesManager from './app/routes-manager/RoutesManager';
 function App() {
   return (
     <div className="App">
-          <RoutesManager/>
+      <RoutesManager/>
     </div>
   );
 }

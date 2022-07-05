@@ -1,2 +1,1 @@
-
-export { default } from './LoginCard'
+export { default } from './LoginCard.jsx'

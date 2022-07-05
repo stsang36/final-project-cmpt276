@@ -1,0 +1,10 @@
+.register
+{
+    color: grey;
+    letter-spacing: 0.8pt;
+    display: inline;
+    text-align: center;
+    float: left;
+    margin: 130px 0 0 -70px;
+}
+
