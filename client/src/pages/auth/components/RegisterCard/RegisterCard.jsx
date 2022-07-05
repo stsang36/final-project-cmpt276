@@ -1,12 +1,22 @@
-import style from './style.module.css'
-import { Link } from 'react-router-dom'
+// client/src/pages/auth/components/RegisterCard/RegisterCard.jsx
 
-const RegisterCard = () => {
+import style from './style.module.css'
+import image from '../assets/stub-image.png'
+import RegisterForm from '../RegisterForm'
+
+const RegisterCard = () => 
+{
+
+  const register = (info) =>
+  {
+    console.log(info)
+  }
+
   return (
-        <h6 className = {style.register}>
-          New to Bytetools?&nbsp;&nbsp;
-          <Link to="/auth/register">Create account</Link>
-          </h6>
+    <div className={style.RegisterCard}>
+      <img src={image} className={style.image} alt="Register Image" />
+      <RegisterForm title='Create Account' onRegister={register} />
+    </div>
   )
 }
 

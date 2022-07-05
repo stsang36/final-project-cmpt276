@@ -1,10 +1,18 @@
-.register
-{
-    color: grey;
-    letter-spacing: 0.8pt;
-    display: inline;
-    text-align: center;
-    float: left;
-    margin: 130px 0 0 -70px;
-}
+/* client/src/pages/auth/components/RegisterCard/style.module.css */
 
+.RegisterCard
+{
+    position: relative;
+}
+.image
+{
+    float:left;
+    display: inline;
+    width: 49%;
+    margin: 130px 0 0 250px;
+    border-top-left-radius: 3%;
+    border-bottom-left-radius: 3%;
+    /* box-shadow: x y blur spread  */
+    box-shadow: -6px 8px 20px 3px rgba(160, 160, 160, 0.308);
+    width: 426px;
+}

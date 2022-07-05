@@ -1,0 +1,97 @@
+/* client/src/pages/auth/components/RegisterForm/style.module.css */
+
+.fieldset
+{
+    background-color: white;
+    float: left;
+    display: block;
+    width:4 5%;
+    height: 503px;
+    margin: 130px 0 0 0px;
+    border-top-right-radius: 3%;
+    border-bottom-right-radius: 3%;
+    border-color: transparent;
+    width: 426px;
+    box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+    text-align: right;
+}
+
+.title
+{
+    display: inline;
+    float: left;
+    margin: 50px 0 0 5px;
+    width: 320px;
+    text-shadow: 0 2px 15px rgb(165, 165, 165);
+    font-size: 25pt;
+    font-weight: bold;
+}
+
+.firstName
+{
+    display: inline;
+    float: left;
+    position: relative;
+    width: 130px;
+    height: 40px;
+    top: 30px;
+    margin: 0 20px 0 42px;
+    padding-left: 15pt;
+    border-color: transparent;
+    border-radius: 7px;
+    box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+    letter-spacing: 1.5pt;
+}
+
+.lastName
+{
+    display: inline;
+    float: left;
+    position: relative;
+    width: 130px;
+    height: 40px;
+    top: 30px;
+    margin: 0 20px 0 2px;
+    padding-left: 15pt;
+    border-color: transparent;
+    border-radius: 7px;
+    box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+    letter-spacing: 1.5pt;
+}
+
+.form
+{
+    position: relative;
+    width: 310px;
+    height: 40px;
+    top: 30px;
+    right: 50px;
+    margin: 30px 0 0 -65px;
+    padding-left: 15pt;
+    border-color: transparent;
+    border-radius: 7px;
+    box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+    letter-spacing: 1.5pt;
+}
+
+.Button
+{
+    top: 100px;
+}
+
+.goBack
+{
+    position: relative;
+    color: grey;
+    font-size: 6pt;
+    letter-spacing: 0.8pt;
+    display: inline;
+    text-align: center;
+    float: left;
+    margin: 75px 0 0 145px;
+}
+
+::placeholder
+{
+    color: rgb(141, 141, 141);
+}

@@ -1,5 +1,5 @@
-// LoginCard.jsx
-import PropTypes from 'prop-types'
+// client/src/pages/auth/components/LoginCard/LoginCard.jsx
+
 import style from './style.module.css'
 import image from '../assets/login-green.png'
 import LoginForm from '../LoginForm/LoginForm'
@@ -12,7 +12,6 @@ const LoginCard = () =>
   {
     console.log(info)
   }
-
 
   return (
     <div className={style.LoginCard}>

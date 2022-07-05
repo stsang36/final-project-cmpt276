@@ -1,9 +1,10 @@
+// client/src/pages/auth/components/LoginForm/LoginForm.jsx
+
 import style from './style.module.css'
 import logo from '../assets/logo.png'
 import Button from 'common/components/Button'
-import Register from '../RegisterCard'
-import Recover from '../RecoverCard'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 const LoginForm = ( {title, onLogin} ) => 
 {
@@ -36,7 +37,10 @@ const LoginForm = ( {title, onLogin} ) =>
       <fieldset className={style.fieldset}>
         <img src={logo} className={style.logo} alt="Bytetools Logo" />
           <h1 className={style.title}> {title} </h1>
-            <Register />
+            <h6 className = {style.register}>
+              New to Bytetools?&nbsp;&nbsp;
+              <Link to="/auth/register">Create account</Link>
+            </h6>
             <div>
                 <input  className={style.form}
                         type='email' 
@@ -53,8 +57,29 @@ const LoginForm = ( {title, onLogin} ) =>
                         onChange={(event) => setPW(event.target.value)}
                 />
             </div>
-            <Recover />
-            <Button text='Log in' onClick={onClick} />
+            <p className={style.recover}>
+              <Link to="/auth/recover">Forgot Password?</Link>
+            </p>
+            <Button text='Log in' 
+                    onClick={onClick} 
+                    style=
+                    {
+                      {
+                        position: 'relative',
+                        top: '90px',
+                        right: '93px',
+                        width: '250px',
+                        height: '40px',
+                        borderColor: 'transparent',
+                        borderRadius: '15px',
+                        backgroundColor: 'rgb(0, 168, 0)',
+                        color: 'rgb(46, 46, 46)',
+                        fontSize: '18px',
+                        fontWeight: 'bold',
+                        boxShadow: '0px 5px 20px 3px rgba(126, 126, 126, 0.5)',
+                      }
+                    }
+            />
       </fieldset>
     </form>
   )

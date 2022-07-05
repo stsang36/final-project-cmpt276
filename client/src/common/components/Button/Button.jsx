@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types'
-import style from './style.module.css'
 
-const Button = ({text, onClick}) => 
+const Button = ({text, onClick, style}) => 
 {
   return (
-    <input  type='submit' onClick={onClick} 
-            className={style.Button} 
-            value={text}/>
+    <input  type='submit' 
+            onClick={onClick} 
+            value={text}
+            style={style}
+    />
   )
 }
 
