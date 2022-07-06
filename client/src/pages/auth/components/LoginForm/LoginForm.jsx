@@ -29,14 +29,15 @@ const LoginForm = () => {
   }
 
   useEffect(() => {
-    const { isSuccess, isError, error } = results
+    const { isSuccess, isError, error, reset } = results
     if(isSuccess){
       toast.success('Signed In Successfully')
       navigate('/')
     }
     if(isError){
       toast.error(`An error occured: ${error.data.message}`)
-    }
+      reset()
+    } 
   },[results, navigate])
 
   return (

@@ -45,6 +45,20 @@ const authSlice = createSlice({
         state.user = user
       }
     )
+    // callback after user registers, store data in redux store
+    builder.addMatcher(
+      serverApi.endpoints.resetPassword.matchFulfilled,
+      (state, {payload}) => {
+        const { token, ...user } = payload
+        sessionStorage.setItem('auth', JSON.stringify({
+          user: user,
+          token: token,
+        }))
+        state.loggedIn = true
+        state.token = token
+        state.user = user
+      }
+    )
   }
 })
 

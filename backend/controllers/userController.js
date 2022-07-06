@@ -1,7 +1,8 @@
 const { pool } = require('../config/pool.js')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-require('express-async-errors')
+const sendEmail = require('../config/mail')
+
 
 // @route:  GET /api/user
 // @desc:   retrieves all users from the database and returns an array of users
@@ -50,7 +51,7 @@ const registerUser = async(req, res) => {
       username: user.username,
       email: user.email,
       role: user.role,
-      token: jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: "24h"})
+      token: jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: "3d"})
     })
   }else{
     res.status(400)
@@ -88,7 +89,7 @@ const loginUser = async(req, res) => {
   }
 }
 
-// @route:  GET /api/user/:id
+// @route:  GET /api/user/actions/:id
 // @desc:   update user data
 // @body:   obj w/ new user obj 
 // @access: PRIVATE (user can only update themselves)
@@ -171,7 +172,7 @@ const updateUserPassword = async(req, res) => {
   }
 }
 
-// @route:  PUT /api/user/:id
+// @route:  PUT /api/user/actions/:id
 // @desc:   update user role
 // @params: id of user to be updated
 // @body:   obj w/ field {role: <<NEW ROLE>>}
@@ -199,7 +200,7 @@ const updateUserRole = async(req, res) => {
   res.status(200).json({message: "success"})
 }
 
-// @route:  DELETE /api/user/:id
+// @route:  DELETE /api/user/actions/:id
 // @desc:   delete user
 // @params: id with the user id 
 // @access: PRIVATE (ADMIN)
@@ -221,6 +222,66 @@ const deleteUser = async(req, res) => {
   res.status(200).json({message: "success"})
 }
 
+// @route:  POST /api/user/forgotpassword/:user
+// @desc:   sends user email reset link
+// @body:   obj with {user: (can be username or email)}
+// @access: PUBLIC
+const forgotPassword = async(req, res) => {
+  const { user } = req.params
+  const findUserQuery = {
+    text: "SELECT * FROM \"user\" WHERE email = $1 OR username = $1 limit 1",
+    values: [user]
+  }
+  const results = await pool.query(findUserQuery)
+  if(!results.rows[0]){
+    res.status(400)
+    throw new Error('user not found')
+  }
+  const { id, email, password } = results.rows[0]
+  const token = jwt.sign({id: id, password: password}, process.env.JWT_SECRET, {expiresIn: "3h"})
+  const msg = {
+    to: email, // change to email
+    from: "chowcarlin@gmail.com",
+    subject: "ByteTools Password Reset",
+    text: `Reset password here: http://localhost:3000/auth/passwordreset/${token}`
+  }
+  sendEmail(msg)
+  res.status(200).json({message: 'success'})
+}
+
+// @route:  PUT /api/user/resetpassword
+// @desc:   resets user password
+// @body:   obj with {password: <<NEW PASSWORD>>, token: <<RESET_TOKEN>>}
+// @access: PUBLIC
+const resetPassword = async(req, res) => {
+  const { token, password } = req.body
+  if(!token){
+    throw new Error('unauthorized access')
+  }
+  const { id, password: oldPassword } = jwt.verify(token, process.env.JWT_SECRET)
+  const results = await pool.query('SELECT * from \"user\" WHERE id = $1 LIMIT 1', [id])
+  const user = results.rows[0]
+  if(user && (oldPassword === user.password)){
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const updatePasswordQuery = {
+      text: "UPDATE \"user\" set password = $1 where id = $2 RETURNING *",
+      values: [hashedPassword, id]
+    }
+    const result = await pool.query(updatePasswordQuery)
+    const updatedUser = result.rows[0]
+    res.status(200).json({
+      id: updatedUser.id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      token: jwt.sign({id: updatedUser.id}, process.env.JWT_SECRET, {expiresIn: "3d"})
+    })
+  }else{
+    res.status(400)
+    throw new Error('invalid credentials')
+  }
+}
+
 
 module.exports = {
   getAllUsers,
@@ -231,4 +292,6 @@ module.exports = {
   updateUserSettings,
   updateUserPassword,
   getUserSettings,
+  forgotPassword,
+  resetPassword,
 }

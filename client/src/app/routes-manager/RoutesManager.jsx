@@ -4,6 +4,7 @@ import LoginCard from 'pages/auth/components/LoginCard'
 import RegisterCard from 'pages/auth/components/RegisterCard'
 import RecoverCard from 'pages/auth/components/RecoverCard'
 import HomeContainer from 'pages/home/components/HomeContainer'
+import PasswordResetCard from 'pages/auth/components/PasswordResetCard'
 
 const RoutesManager = () => {
   return (
@@ -13,6 +14,7 @@ const RoutesManager = () => {
         <Route path='login' element={<LoginCard />} />
         <Route path='register' element={<RegisterCard />} />
         <Route path='recover' element={<RecoverCard />} />
+        <Route path='passwordreset/:token' element={<PasswordResetCard/>}/>
       </Route>
     </Routes>
   )

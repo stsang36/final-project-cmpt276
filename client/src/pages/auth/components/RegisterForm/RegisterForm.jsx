@@ -33,13 +33,14 @@ const RegisterForm = () => {
   }
 
   useEffect(()=>{
-    const { isSuccess, isError, error } = results
+    const { isSuccess, isError, error, reset } = results
     if(isSuccess){
       toast.success('Account has been created')
       navigate('/')
     }
     if(isError){
       toast.error(`An error occured: ${error.data.message}`)
+      reset()
     }
   },[results, navigate])
 
