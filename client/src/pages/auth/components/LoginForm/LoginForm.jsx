@@ -19,6 +19,7 @@ const LoginForm = () => {
       onSubmit()
     }
   }
+  
   const onSubmit = () => {
     if(!username || !password){
       toast.warn('Please fill in all required fields')
@@ -58,7 +59,7 @@ const LoginForm = () => {
           <input  
             className={style.input}
             type='username' 
-            placeholder='Username'
+            placeholder='Username or Email'
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             onKeyPress={handleKeyPress}

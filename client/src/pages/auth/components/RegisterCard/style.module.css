@@ -1,18 +1,11 @@
 /* client/src/pages/auth/components/RegisterCard/style.module.css */
-
-.RegisterCard
-{
-    position: relative;
+.registerCard{
+  display: flex;
+  width: clamp(600px, 700px, 100%);
 }
-.image
-{
-    float:left;
-    display: inline;
-    width: 49%;
-    margin: 130px 0 0 250px;
-    border-top-left-radius: 3%;
-    border-bottom-left-radius: 3%;
-    /* box-shadow: x y blur spread  */
-    box-shadow: -6px 8px 20px 3px rgba(160, 160, 160, 0.308);
-    width: 426px;
+
+.img{
+  /* box-shadow: x y blur spread  */
+  box-shadow: -6px 8px 20px 3px rgba(160, 160, 160, 0.308);
+  width: 50%;
 }

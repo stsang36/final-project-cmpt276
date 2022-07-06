@@ -18,22 +18,29 @@ const getAllUsers = async(req, res) => {
 // @access: PUBLIC
 const registerUser = async(req, res) => {
   const {username, password, email} = req.body
-  if(!username || !password){
+  if(!username || !password || !email){
     res.status(400)
-    throw new Error('Missing fields!')
+    throw new Error('missing fields')
   }
-  const duplicateUser = await pool.query('select * from \"user\" where username = $1 limit 1', [username.toLowerCase()])
-  if(duplicateUser.rows[0]){
+  const duplicateUsername = await pool.query('select * from \"user\" where username = $1 limit 1', [username.toLowerCase()])
+  if(duplicateUsername.rows[0]){
     res.status(400)
     throw new Error('username already exists')
   }
+
+  const duplicateEmail = await pool.query('select * from \"user\" where username = $1 limit 1', [email.toLowerCase()])
+  if(duplicateEmail.rows[0]){
+    res.status(400)
+    throw new Error('email already in use')
+  }
+
 
   // hash password
   const saltRounds = 10
   const hashedPassword = await bcrypt.hash(password, saltRounds)
   const registerUserQuery = {
-    text: 'INSERT into \"user\" VALUES (DEFAULT, $1, $2, $3, $4, $5, $6, $7) RETURNING *', 
-    values: [username, email, hashedPassword, null, "client", false, true]
+    text: 'INSERT into \"user\" VALUES (DEFAULT, $1, $2, $3, $4, DEFAULT, DEFAULT, DEFAULT) RETURNING *', 
+    values: [username, email, hashedPassword, null]
   }
   const results = await pool.query(registerUserQuery)
   const user = results.rows[0]
@@ -47,7 +54,7 @@ const registerUser = async(req, res) => {
     })
   }else{
     res.status(400)
-    throw new Error('Invalid User data')
+    throw new Error('invalid user data')
   }
 }
 
@@ -59,10 +66,10 @@ const loginUser = async(req, res) => {
   const {username, password} = req.body
   if(!username || !password){
     res.status(400)
-    throw new error('Missing Fields')
+    throw new error('missing fields')
   }
   const findUserQuery = {
-    text: "SELECT * from \"user\" WHERE username = $1 limit 1",
+    text: "SELECT * from \"user\" WHERE username = $1 OR email = $1 limit 1",
     values: [username]
   }
   const results = await pool.query(findUserQuery)
@@ -121,8 +128,15 @@ const updateUserSettings = async(req, res) => {
   const duplicateUsername = await pool.query('SELECT * from \"user\" WHERE username = $1 AND id != $2 limit 1', [username.toLowerCase(), id])
   if(duplicateUsername.rows[0]){
     res.status(400)
-    throw new Error('Username is already taken')
+    throw new Error('username is already taken')
   }
+
+  const duplicateEmail = await pool.query('SELECT * from \"user\" WHERE email = $1 AND id != $2 limit 1', [email.toLowerCase(), id])
+  if(duplicateEmail.rows[0]){
+    res.status(400)
+    throw new Error('email already in use')
+  }
+  
   const updateUserSettingsQuery = {
     text: 'UPDATE \"user\" SET username = $1, email = $2, discordid = $3, togglediscordpm = $4, toggleemailnotification = $5 where id = $6 RETURNING *',
     values: [username, email, discordId, toggleDiscordPm, toggleEmailNotification, id]
