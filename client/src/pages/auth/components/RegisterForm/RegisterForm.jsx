@@ -41,7 +41,7 @@ const RegisterForm = () => {
     if(isError){
       toast.error(`An error occured: ${error.data.message}`)
     }
-  },[results])
+  },[results, navigate])
 
   return (
     <div className={style.form}>
