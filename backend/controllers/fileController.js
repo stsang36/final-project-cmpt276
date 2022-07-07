@@ -13,15 +13,22 @@ const uploadFile = async (req, res) => {
     const fileExt = req.body.fileType
     const fileStatus = req.body.fileStatus
 
+    if (!file || !fileName || !fileExt || !fileStatus) {
+        res.status(400)
+        throw new Error('File upload failed, missing required fields')
+    }
+
     const newFile = file.toString('base64')
     const newBuf = Buffer.from(newFile, 'base64')
     const insertQuery = {
-        text: 'INSERT into file(name, type, status, created_At, media) VALUES ($1, $2, $3, $4)',
+        text: 'INSERT into file(name, type, status, media) VALUES ($1, $2, $3, $4)',
         values: [fileName, fileExt, fileStatus, newBuf]
     }
     await pool.query(insertQuery)
 
     res.status(200).send('File uploaded successfully, great success!')
+
+    return
 }
 
 // @route:  DELETE /api/file
@@ -58,6 +65,8 @@ const deleteFile = async (req, res) => {
     await pool.query(deleteQuery)
 
     res.status(200).send(`ID: ${fileId} ${fileResult.rows[0].name}.${fileResult.rows[0].type} deleted.`)
+
+    return
 }
 
 // @route:  GET /api/file/:id
@@ -94,9 +103,11 @@ const getFile = async (req, res) => {
     res.set('content-disposition', `attachment; filename=${fileName}.${fileType}`);
     // set content type accordingly
     res.set('content-type', `application/${fileType}`)
-    readStream.pipe(res)
+    readStream.pipe(res);
 
-    res.status(200).send('File downloaded successfully, great success!')
+    res.status(200)
+    
+    return;
 }
 
 
