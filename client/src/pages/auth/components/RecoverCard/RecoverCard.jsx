@@ -1,7 +1,7 @@
 import style from './style.module.css'
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { useForgotPasswordMutation } from 'redux/apis/serverApi'
+import { useForgotPasswordMutation } from 'redux/slices/userSlice'
 import Button from 'common/components/Button'
 import { toast } from 'react-toastify'
 

@@ -13,7 +13,7 @@ const Protect = ({roles, children}) => {
     if(roles && !(roles.includes(user.role))){
       navigate('/')
     }
-  },[user, loggedIn, token])
+  },[user, loggedIn, token, roles, navigate])
 
   return (
     <>

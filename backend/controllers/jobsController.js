@@ -33,9 +33,13 @@ const deletejob =async (req,res)=>{
     
 }
 
+const addJob = async() => {
+  console.log('add job')
+}
+
 
 module.exports = { 
     getjobs,
     deletejob,
-    addjob
+    addJob
   }

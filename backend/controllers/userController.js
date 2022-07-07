@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const sendEmail = require('../config/mail')
 
 
-// @route:  GET /api/user
+// @route:  GET /api/user/
 // @desc:   retrieves all users from the database and returns an array of users
 // @access: PRIVATE 
 const getAllUsers = async(req, res) => {
@@ -37,8 +37,7 @@ const registerUser = async(req, res) => {
 
 
   // hash password
-  const saltRounds = 10
-  const hashedPassword = await bcrypt.hash(password, saltRounds)
+  const hashedPassword = await bcrypt.hash(password, 10)
   const registerUserQuery = {
     text: 'INSERT into \"user\" VALUES (DEFAULT, $1, $2, $3, $4, DEFAULT, DEFAULT, DEFAULT) RETURNING *', 
     values: [username, email, hashedPassword, null]
@@ -89,16 +88,12 @@ const loginUser = async(req, res) => {
   }
 }
 
-// @route:  GET /api/user/actions/:id
+// @route:  GET /api/user/settings/:id
 // @desc:   update user data
 // @body:   obj w/ new user obj 
 // @access: PRIVATE (user can only update themselves)
 const getUserSettings = async(req, res) => {
-  const { id } = req.params
-  if(parseInt(id) !== req.user.id){
-    res.status(401)
-    throw new Error('Unauthorized Access')
-  }
+  const { id } = req.user
   const getUserSettingsQuery = {
     text: "SELECT id, username, email, discordid, togglediscordpm, toggleemailnotification FROM \"user\" WHERE id = $1 limit 1",
     values: [id]
@@ -116,7 +111,7 @@ const getUserSettings = async(req, res) => {
   })
 }
 
-// @route:  PUT /api/user
+// @route:  PUT /api/user/settings
 // @desc:   update user data
 // @body:   obj w/ new user obj 
 // @access: PRIVATE (user can only update themselves)
@@ -154,11 +149,8 @@ const updateUserSettings = async(req, res) => {
 // @body:   obj w/ fields { id: <<USERID>>, newPassword: <<newPassword>>, oldPassword: <<oldPassword>> }
 // @access: PRIVATE 
 const updateUserPassword = async(req, res) => {
-  if(req.user.id !== parseInt(req.body.id)){
-    res.status(400)
-    throw new Error('Unauthorized Access')
-  }
-  const { id, newPassword, oldPassword } = req.body
+  const { id } = req.user
+  const { newPassword, oldPassword } = req.body
   const results = await pool.query('SELECT * FROM \"user\" WHERE id = $1 limit 1', [id])
   const user = results.rows[0]
   if(user && (await bcrypt.compare(oldPassword, user.password))){
@@ -172,18 +164,16 @@ const updateUserPassword = async(req, res) => {
   }
 }
 
-// @route:  PUT /api/user/actions/:id
+// @route:  PUT /api/user/admin
 // @desc:   update user role
-// @params: id of user to be updated
-// @body:   obj w/ field {role: <<NEW ROLE>>}
+// @body:   obj w/ fields {id: <<USER ID>> role: <<NEW ROLE>>}
 // @access: PRIVATE (ADMIN)
 const updateUserRole = async(req, res) => {
   if(req.user.role !== 'admin'){
     res.status(401)
     throw new Error('Unauthorized Access')
   }
-  const { id } = req.params
-  const role = req.body.role.toLowerCase()
+  const { id, role } = req.body
   if(!id || !role){
     res.status(400)
     throw new Error('Missing Fields')

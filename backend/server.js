@@ -13,7 +13,8 @@ const PORT = process.env.PORT
 // middleware for handling requests
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
-app.use(cors())
+
+if(process.env.NODE_ENV === 'development') app.use(cors())
 
 // routes
 app.use('/api/user', require('./routes/userRoutes'))

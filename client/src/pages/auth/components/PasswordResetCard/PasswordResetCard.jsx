@@ -3,7 +3,7 @@ import Button from 'common/components/Button'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useResetPasswordMutation } from 'redux/apis/serverApi'
+import { useResetPasswordMutation } from 'redux/slices/userSlice'
 
 const PasswordResetCard = () => {
   const navigate = useNavigate()

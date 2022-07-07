@@ -14,14 +14,22 @@ const {
   resetPassword,
 } = require('../controllers/userController')
 
-router.route('/').get(protect, getAllUsers).post(registerUser).put(protect, updateUserSettings)
+// authentication 
+router.route('/').get(protect, getAllUsers).post(registerUser)
 
 router.route('/login').post(loginUser)
 
-router.route('/changepassword').put(protect, updateUserPassword)
+// settings
+router.route('/settings').get(protect, getUserSettings).put(protect, updateUserSettings)
 
-router.route('/actions/:id').delete(protect, deleteUser).put(protect, updateUserRole).get(protect, getUserSettings)
+router.route('/settings/changepassword').put(protect, updateUserPassword)
 
+//  admin routes
+router.route('/admin').put(protect, updateUserRole)
+
+router.route('/admin/:id').delete(protect, deleteUser)
+
+//  password recovery 
 router.route('/forgotpassword/:user').post(forgotPassword)
 
 router.route('/resetpassword').put(resetPassword)

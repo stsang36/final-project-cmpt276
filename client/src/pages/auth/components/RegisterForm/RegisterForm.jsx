@@ -3,7 +3,7 @@ import style from './style.module.css'
 import Button from 'common/components/Button'
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useRegisterMutation } from 'redux/apis/serverApi'
+import { useRegisterMutation } from 'redux/slices/userSlice'
 import { toast } from 'react-toastify'
 
 const RegisterForm = () => {

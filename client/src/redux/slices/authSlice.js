@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { serverApi } from 'redux/apis/serverApi'
+import { userExtendedApiSlice } from './userSlice'
 
 const sessionUser = JSON.parse(sessionStorage.getItem('auth'))
 
@@ -19,7 +19,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     // callback after user login, store data in redux store
     builder.addMatcher(
-      serverApi.endpoints.login.matchFulfilled,
+      userExtendedApiSlice.endpoints.login.matchFulfilled,
       (state, {payload}) => {
         const { token, ...user } = payload
         sessionStorage.setItem('auth', JSON.stringify({
@@ -33,7 +33,7 @@ const authSlice = createSlice({
     )
     // callback after user registers, store data in redux store
     builder.addMatcher(
-      serverApi.endpoints.register.matchFulfilled,
+      userExtendedApiSlice.endpoints.register.matchFulfilled,
       (state, {payload}) => {
         const { token, ...user } = payload
         sessionStorage.setItem('auth', JSON.stringify({
@@ -47,7 +47,7 @@ const authSlice = createSlice({
     )
     // callback after user registers, store data in redux store
     builder.addMatcher(
-      serverApi.endpoints.resetPassword.matchFulfilled,
+      userExtendedApiSlice.endpoints.resetPassword.matchFulfilled,
       (state, {payload}) => {
         const { token, ...user } = payload
         sessionStorage.setItem('auth', JSON.stringify({

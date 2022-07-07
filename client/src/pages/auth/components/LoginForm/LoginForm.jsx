@@ -1,12 +1,11 @@
 // client/src/pages/auth/components/LoginForm/LoginForm.jsx
-
 import style from './style.module.css'
 import logo from '../assets/logo.png'
 import Button from 'common/components/Button'
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { useLoginMutation } from 'redux/apis/serverApi'
+import { useLoginMutation } from 'redux/slices/userSlice'
 
 const LoginForm = () => {
   const [username, setUsername] = useState('')
