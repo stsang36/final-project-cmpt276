@@ -34,8 +34,6 @@ const registerUser = async(req, res) => {
     res.status(400)
     throw new Error('email already in use')
   }
-
-
   // hash password
   const hashedPassword = await bcrypt.hash(password, 10)
   const registerUserQuery = {
@@ -126,13 +124,11 @@ const updateUserSettings = async(req, res) => {
     res.status(400)
     throw new Error('username is already taken')
   }
-
   const duplicateEmail = await pool.query('SELECT * from \"user\" WHERE email = $1 AND id != $2 limit 1', [email.toLowerCase(), id])
   if(duplicateEmail.rows[0]){
     res.status(400)
     throw new Error('email already in use')
   }
-  
   const updateUserSettingsQuery = {
     text: 'UPDATE \"user\" SET username = $1, email = $2, discordid = $3, togglediscordpm = $4, toggleemailnotification = $5 where id = $6 RETURNING *',
     values: [username, email, discordId, toggleDiscordPm, toggleEmailNotification, id]
@@ -144,7 +140,7 @@ const updateUserSettings = async(req, res) => {
     email: updatedUserSettings.email,
   })
 }
-// @route:  PUT /api/user/changepassword
+// @route:  PUT /api/user/settings/changepassword
 // @desc:   update user password
 // @body:   obj w/ fields { id: <<USERID>>, newPassword: <<newPassword>>, oldPassword: <<oldPassword>> }
 // @access: PRIVATE 
@@ -190,7 +186,7 @@ const updateUserRole = async(req, res) => {
   res.status(200).json({message: "success"})
 }
 
-// @route:  DELETE /api/user/actions/:id
+// @route:  DELETE /api/user/admin/:id
 // @desc:   delete user
 // @params: id with the user id 
 // @access: PRIVATE (ADMIN)
