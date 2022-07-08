@@ -15,11 +15,12 @@ const LoginForm = () => {
 
   const handleKeyPress = (event) => {
     if(event.key === 'Enter'){
-      onSubmit()
+      onSubmit(event)
     }
   }
   
-  const onSubmit = () => {
+  const onSubmit = (event) => {
+    event.preventDefault()
     if(!username || !password){
       toast.warn('Please fill in all required fields')
       return
@@ -40,15 +41,17 @@ const LoginForm = () => {
   },[results, navigate])
 
   return (
-    <div className={style.form}>
-      <div className={style.header}>
-        <img src={logo} className={style.logo} alt="Bytetools Logo" />
+    <form 
+      className={style.form}
+    >
+      <header className={style.header}>
+        <img src={logo} className={style.logo} alt=''/>
         <h1 className={style.h1}>Bytetools</h1>
-      </div>
-      <div className={style.fieldset}>
+      </header>
+      <fieldset className={style.fieldset}>
         <div className={style.username}>
           <p className={style.p}>
-            New to Bytetools? 
+            New to Bytetools?
             <Link 
               to='/auth/register'
               className={style.a}
@@ -56,7 +59,8 @@ const LoginForm = () => {
               Create Account 
             </Link>
           </p>
-          <input  
+          <input
+            aria-required='true'  
             className={style.input}
             type='username' 
             placeholder='Username or Email'
@@ -66,7 +70,8 @@ const LoginForm = () => {
           />
         </div>
         <div className={style.password}>
-          <input  
+          <input
+            aria-required='true'  
             className={style.input}
             type='password' 
             placeholder='Password'
@@ -81,13 +86,13 @@ const LoginForm = () => {
             Forgot Password?
           </Link>
         </div>
-      </div>
+      </fieldset>
       <Button 
         className={style.button}
         text='Log in' 
         onClick={onSubmit}
       />
-    </div>
+    </form>
   )
 }
 

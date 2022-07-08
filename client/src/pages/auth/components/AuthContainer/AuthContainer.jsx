@@ -6,9 +6,9 @@ import { Outlet } from 'react-router-dom'
 const AuthContainer = () => {
   return (
     <Layout>
-      <div className={style.authContainer}>
+      <main className={style.authContainer}>
         <Outlet/>
-      </div>
+      </main>
     </Layout>
   )
 }

@@ -30,6 +30,11 @@ const PasswordResetCard = () => {
     resetPassord({token, password})
   }
 
+  useEffect(() => {
+    document.title = 'Bytetools | Password Reset'
+    return () => document.title = 'Bytetools'
+  },[])
+
   useEffect(()=>{
     const { isSuccess, isError, error, reset } = results
     if(isSuccess){
@@ -44,9 +49,10 @@ const PasswordResetCard = () => {
   },[results, navigate])
 
   return (
-    <div className={style.passwordResetCard}>
+    <section className={style.passwordResetCard}>
       <h1 className={style.h1}>Reset Password</h1>
       <input 
+        aria-required='true'
         className={style.input}
         type='password'
         placeholder='New Password'
@@ -54,7 +60,8 @@ const PasswordResetCard = () => {
         onChange={(e)=>setPassword(e.target.value)}
         onKeyPress={handleKeyPress}
       />
-      <input 
+      <input
+        aria-required='true'
         className={style.input}
         type='password'
         placeholder='Retype Password'
@@ -67,7 +74,7 @@ const PasswordResetCard = () => {
         text='Confirm Change'
         onClick={handleChangePassword}
       />
-    </div>
+    </section>
   )
 }
 
