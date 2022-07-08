@@ -12,17 +12,23 @@ const RecoverCard = () => {
   
   const handleKeyPress = (event) => {
     if(event.key === 'Enter'){
-      handleRecover()
+      handleRecover(event)
     }
   }
 
-  const handleRecover = () => {
+  const handleRecover = (event) => {
+    event.preventDefault()
     if(!user){
       toast.warn('Please fill in all required fields')
       return
     }
     forgotPassword({user})
   }
+
+  useEffect(() => {
+    document.title = 'Bytetools | Password Recovery'
+    return () => document.title = 'Bytetools'
+  },[])
 
   useEffect(() => {
     if(isSuccess){
@@ -36,10 +42,11 @@ const RecoverCard = () => {
   },[isSuccess, isError, error, reset])
 
   return (
-    <div className={style.recoverCard}>
+    <section className={style.recoverCard}>
       <h1 className={style.h1}>Recover Password</h1>
-      <div className={style.fieldset}> 
+      <form aria-live='assertive' className={style.fieldset}> 
         <input
+          aria-required='true'
           className={style.input}
           type='text'
           value={user}
@@ -52,21 +59,21 @@ const RecoverCard = () => {
           className={style.a} 
           to='/auth/login'
         >
-          Go back to login
+          Go back to login page
         </Link>
         }
         {isSuccess && 
-          <div className={style.message}>
+          <p className={style.message}>
             Please check your email for further instructions
-          </div>
+          </p>
         }
-      </div>
+      </form>
       <Button 
         text='Submit'
         className={style.button}
         onClick={handleRecover}
       />
-    </div>
+    </section>
   )
 }
 

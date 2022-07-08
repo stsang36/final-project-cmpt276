@@ -16,11 +16,12 @@ const RegisterForm = () => {
 
   const handleKeyPress = (event) => {
     if(event.key === 'Enter'){
-      onSubmit()
+      onSubmit(event)
     }
   }
 
-  const onSubmit = () => {
+  const onSubmit = (event) => {
+    event.preventDefault()
     if(!username || !email || !password || !confirmPassword){
       toast.warn('Please fill in all required fields')
       return
@@ -45,10 +46,11 @@ const RegisterForm = () => {
   },[results, navigate])
 
   return (
-    <div className={style.form}>
+    <form className={style.form}>
       <h1 className={style.h1}>Create Account</h1>
-      <div className={style.fieldset}>
-        <input  
+      <fieldset className={style.fieldset}>
+        <input
+          aria-required='true'
           className={style.input}
           type="text" 
           placeholder='Username'
@@ -56,7 +58,8 @@ const RegisterForm = () => {
           onChange={(event) => setUsername(event.target.value)}
           onKeyPress={handleKeyPress}
         />
-        <input  
+        <input
+          aria-required='true'
           className={style.input}
           type="text" 
           placeholder='Email'
@@ -64,7 +67,8 @@ const RegisterForm = () => {
           onChange={(event) => setEmail(event.target.value)}
           onKeyPress={handleKeyPress}
         />
-        <input  
+        <input
+          aria-required='true'  
           className={style.input}
           type='password' 
           placeholder='Password'
@@ -72,7 +76,8 @@ const RegisterForm = () => {
           onChange={(event) => setPassword(event.target.value)}
           onKeyPress={handleKeyPress}
         />
-        <input  
+        <input
+          aria-required='true'
           className={style.input}
           type='password' 
           placeholder='Retype Password'
@@ -80,7 +85,7 @@ const RegisterForm = () => {
           onChange={(event) => setConfirmPassword(event.target.value)}
           onKeyPress={handleKeyPress}
         />
-      </div>
+      </fieldset>
       <Link 
         className={style.a} 
         to="/auth/login"
@@ -92,21 +97,8 @@ const RegisterForm = () => {
         text='Register' 
         onClick={onSubmit}
       />
-    </div>
+    </form>
   )
 }
-
-// position: 'relative',
-//                       top: '55px',
-//                       right: '93px',
-//                       width: '250px',
-//                       height: '40px',
-//                       borderColor: 'transparent',
-//                       borderRadius: '15px',
-//                       backgroundColor: 'rgb(0, 168, 0)',
-//                       color: 'rgb(46, 46, 46)',
-//                       fontSize: '18px',
-//                       fontWeight: 'bold',
-//                       boxShadow: '0px 5px 20px 3px rgba(126, 126, 126, 0.5)',
 
 export default RegisterForm
