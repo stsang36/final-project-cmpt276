@@ -21,14 +21,14 @@ const uploadFile = async (req, res) => {
     const newFile = file.toString('base64')
     const newBuf = Buffer.from(newFile, 'base64')
     const insertQuery = {
-        text: 'INSERT into file(name, type, status, media) VALUES ($1, $2, $3, $4)',
+        text: 'INSERT into file(name, type, status, media) VALUES ($1, $2, $3, $4) RETURNING id',
         values: [fileName, fileType, fileStatus, newBuf]
     }
     const inserted = await pool.query(insertQuery)
-
+    
     res.status(200).send({
         'message': 'File uploaded successfully',
-        'fileId': inserted.rows.id,
+        'fileId': inserted.rows[0].id,
     })
 
     return

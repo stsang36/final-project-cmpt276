@@ -1,7 +1,7 @@
 const { pool } = require('../config/pool.js')
 require('express-async-errors')
 
-const getAllJobs = (req,res)=>{
+const getAllJobs = async (req,res)=>{
   const results = await pool.query('SELECT * FROM job')
   res.status(200).json(results.rows)
 }
