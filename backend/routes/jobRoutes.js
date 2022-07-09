@@ -1,11 +1,9 @@
 const express = require("express")
 const router = express.Router()
+const { protect } = require('../middleware/authMiddleware')
+const { getAllJobs, addJob, deletejob } = require('../controllers/jobsController')
 
-const { getjobs, addJob, deletejob } = require('../controllers/jobsController')
-
-router.route("/").get(getjobs);
-
-router.route("/addnewjob").get(addJob);
+router.route("/").get(protect, getAllJobs).post(protect, addJob)
 
 router.route("/:id").delete(deletejob)
 

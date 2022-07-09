@@ -95,14 +95,14 @@ const getFile = async (req, res) => {
     const fileContent = data.rows[0].media;
 
     // convert buffer to string base64, would be the content the server recieves
-    const newContent = fileContent.toString('base64');
+    // const newContent = fileContent.toString('base64');
     // convert string to a buffer in order to be served to client for download
-    const newBuf = Buffer.from(newContent, 'base64')
+    // const newBuf = Buffer.from(newContent, 'base64')
     let readStream = new stream.PassThrough()
-    readStream.end(newBuf)
-    res.set('content-disposition', `attachment; filename=${fileName}.${fileType}`);
+    readStream.end(fileContent)
+    res.set('content-disposition', `attachment; filename=${fileName}`);
     // set content type accordingly
-    res.set('content-type', `application/${fileType}`)
+    res.set('content-type', `${fileType}`)
     readStream.pipe(res);
 
     res.status(200)
