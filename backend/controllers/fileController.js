@@ -29,7 +29,6 @@ const uploadFile = async (req, res) => {
     res.status(200).send({
         'message': 'File uploaded successfully',
         'fileId': inserted.rows.id,
-        'status': 'success'
     })
 
     return
@@ -69,11 +68,9 @@ const deleteFile = async (req, res) => {
     await pool.query(deleteQuery)
 
     res.status(200).send({
-        'message':`ID: ${fileId} deleted.`,
+        'message':`ID: ${fileId} deleted successfuly.`,
         'fileId': fileId,
-        'status': 'success'
-
-})
+    })
 
     return
 }
