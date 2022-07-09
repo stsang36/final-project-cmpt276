@@ -10,10 +10,10 @@ const uploadFile = async (req, res) => {
 
     const file = req.body.file
     const fileName = req.body.fileName
-    const fileExt = req.body.fileType
+    const fileType = req.body.fileType
     const fileStatus = req.body.fileStatus
 
-    if (!file || !fileName || !fileExt || !fileStatus) {
+    if (!file || !fileName || !fileType || !fileStatus) {
         res.status(400)
         throw new Error('File upload failed, missing required fields')
     }
@@ -22,7 +22,7 @@ const uploadFile = async (req, res) => {
     const newBuf = Buffer.from(newFile, 'base64')
     const insertQuery = {
         text: 'INSERT into file(name, type, status, media) VALUES ($1, $2, $3, $4)',
-        values: [fileName, fileExt, fileStatus, newBuf]
+        values: [fileName, fileType, fileStatus, newBuf]
     }
     const inserted = await pool.query(insertQuery)
 
