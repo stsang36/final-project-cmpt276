@@ -24,9 +24,13 @@ const uploadFile = async (req, res) => {
         text: 'INSERT into file(name, type, status, media) VALUES ($1, $2, $3, $4)',
         values: [fileName, fileExt, fileStatus, newBuf]
     }
-    await pool.query(insertQuery)
+    const inserted = await pool.query(insertQuery)
 
-    res.status(200).send('File uploaded successfully, great success!')
+    res.status(200).send({
+        'message': 'File uploaded successfully',
+        'fileId': inserted.rows.id,
+        'status': 'success'
+    })
 
     return
 }
@@ -64,7 +68,12 @@ const deleteFile = async (req, res) => {
 
     await pool.query(deleteQuery)
 
-    res.status(200).send(`ID: ${fileId} ${fileResult.rows[0].name}.${fileResult.rows[0].type} deleted.`)
+    res.status(200).send({
+        'message':`ID: ${fileId} deleted.`,
+        'fileId': fileId,
+        'status': 'success'
+
+})
 
     return
 }
