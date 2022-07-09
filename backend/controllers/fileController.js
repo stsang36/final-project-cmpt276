@@ -28,7 +28,7 @@ const uploadFile = async (req, res) => {
     
     res.status(200).send({
         'message': 'File uploaded successfully',
-        'fileId': inserted.rows[0].id,
+        'fileId': inserted.rows[0].id
     })
 
     return
