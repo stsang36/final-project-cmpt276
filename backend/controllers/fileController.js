@@ -38,7 +38,7 @@ const uploadFile = async (req, res) => {
 const deleteFile = async (req, res) => {
 
     const fileId = req.body.fileId;
-    const role = req.body.role; // this might be a security vulnurability because what if an authenticated employee sends bad request?
+    const role = req.user.role;
 
     if (role !== 'admin') {
         res.status(401)
