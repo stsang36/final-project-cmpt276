@@ -69,7 +69,7 @@ const deleteFile = async (req, res) => {
 
     res.status(200).send({
         'message':`ID: ${fileId} deleted successfuly.`,
-        'fileId': fileId,
+        'fileId': fileId
     })
 
     return
