@@ -68,7 +68,7 @@ const deleteFile = async (req, res) => {
     await pool.query(deleteQuery)
 
     res.status(200).send({
-        'message':`ID: ${fileId} deleted successfuly.`,
+        'message':`ID: ${fileId} deleted successfully.`,
         'fileId': fileId
     })
 
