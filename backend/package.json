@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node /test/test.js",
+    "test": "mocha ./test/test-server.js",
     "start": "node server.js",
     "server": "nodemon server.js",
     "legacy": "nodemon -L server.js"
@@ -18,13 +18,16 @@
     "@sendgrid/mail": "^7.7.0",
     "bcrypt": "^5.0.1",
     "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "express-async-errors": "^3.1.1",
+    "fs": "^0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "mocha": "^10.0.0",
     "mock-session": "^0.0.5",
+    "path": "^0.12.7",
     "pg": "^8.7.3",
     "stream": "^0.0.2"
   }
