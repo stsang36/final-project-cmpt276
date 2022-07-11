@@ -80,7 +80,6 @@ const deleteFile = async (req, res) => {
 // @body:   obj w/ id (fileID)
 // @access: PRIVATE (Employees ONLY)
 const getFile = async (req, res) => {
-
     const fileId = req.params['id']; //id should be fileID
 
     const getDataQuery = {
@@ -109,6 +108,7 @@ const getFile = async (req, res) => {
     res.set('content-disposition', `attachment; filename=${fileName}`);
     // set content type accordingly
     res.set('content-type', `${fileType}`)
+    res.set('Access-Control-Expose-Headers', 'Content-Disposition')
     readStream.pipe(res);
 
     res.status(200)
