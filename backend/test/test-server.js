@@ -15,21 +15,16 @@ console.log(`Database URL: ${process.env.DATABASE_URL}`)
 
 //initiaite the tests poggers
 
-<<<<<<< HEAD
 const adminAcct = {
-=======
-const testingAcct = {
->>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
     "username": "admin",
     "password": "admin"
 }
 
-<<<<<<< HEAD
-testingAcct = {
+const testingAcct = {
     "email": "test@gmail.com",
     "username": "testing",
     "password": "testing",
-    "role": "client"
+    "id": null
 }
 
 //read file from /testFiles and convert to base64
@@ -66,8 +61,6 @@ describe('loginSystem', () => {
                 done()
             }
 
-            console.log(res.body);
-
             res.should.have.status(200)
             res.body.should.be.a('object')
             res.body.should.have.property('token')
@@ -79,20 +72,13 @@ describe('loginSystem', () => {
             res.body.username.should.equal(testingAcct.username)
             res.body.token.should.be.a('string')
             res.body.id.should.be.a('number')
+            testingAcct.id = res.body.id;
             done()
         })
 
     })
 
     it('should login to newly created account on POST request /api/user/login', (done) => {
-=======
-
-
-//read file from /testFiles and convert to base64
-
-describe('login', () => {
-    it('should return a token POST request /api/user/login', (done) => {
->>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
         chai.request(server)
             .post('/api/user/login')
             .send(testingAcct)
@@ -105,40 +91,46 @@ describe('login', () => {
                 res.should.have.status(200)
                 res.body.should.be.a('object')
                 res.body.should.have.property('token')
-<<<<<<< HEAD
                 done()
             })
     })
 
-})
-
-
-=======
-                token = res.body.token
+    it('should delete newly created account on DELETE request /api/user/admin/:id', (done) => {
+        chai.request(server)
+            .delete('/api/user/admin/' + testingAcct.id)
+            .set('Authorization', `Bearer ${token}`)
+            .end((err, res) => {
+                
+               if (err) {
+                   console.log(err)
+                   done()
+               }
+               
+                res.should.have.status(200)
+                res.body.should.be.a('object')
+                res.body.should.have.property('message')
+                res.body.message.should.equal("success")
                 done()
-            })
+        })
+
     })
-})
+});
 
-
-
->>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
-const file = fs.readFileSync(path.resolve(__dirname, './testFiles/sample.pdf'), 'base64')
+const fileName = 'sample.pdf'
+const fileType = 'application/pdf'
+const filePath = path.resolve(__dirname, `./testFiles/${fileName}`)
+const file = fs.readFileSync(filePath, 'base64')
 let id 
 
 describe('fileSystem', () => {
-<<<<<<< HEAD
-
-=======
->>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
     it('should upload a file for a POST on /api/file', (done) => {
         chai.request(server)
         .post('/api/file')
         .send({
             'file': file,
-            'fileName': 'sample.pdf',
-            'fileType': 'application/pdf',
-            'fileStatus': 'sample'
+            'fileName': fileName,
+            'fileType': fileType,
+            'fileStatus': 'testing'
         })
         .set('Authorization', `Bearer ${token}`)
         .end( (error, res) => {
@@ -169,18 +161,16 @@ describe('fileSystem', () => {
                 done();
             }
 
+            res.headers['content-type'].should.equal(fileType);
+            res.headers['content-disposition'].should.equal(`attachment; filename=${fileName}`);
             res.should.have.status(200);
             done();
         });
     })
 
     it('should delete a file for a DELETE on /api/file', (done) => {
-<<<<<<< HEAD
         chai.request(server)
         .delete('/api/file').send({
-=======
-        chai.request(server).delete('/api/file').send({
->>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
             'fileId': id,
         })
         .set('Authorization', `Bearer ${token}`)
