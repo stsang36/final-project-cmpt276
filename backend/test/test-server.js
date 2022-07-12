@@ -24,7 +24,7 @@ testingAcct = {
     "email": "test@gmail.com",
     "username": "testing",
     "password": "testing",
-    "role": "client"
+    "id": null
 }
 
 //read file from /testFiles and convert to base64
@@ -61,8 +61,6 @@ describe('loginSystem', () => {
                 done()
             }
 
-            console.log(res.body);
-
             res.should.have.status(200)
             res.body.should.be.a('object')
             res.body.should.have.property('token')
@@ -74,6 +72,7 @@ describe('loginSystem', () => {
             res.body.username.should.equal(testingAcct.username)
             res.body.token.should.be.a('string')
             res.body.id.should.be.a('number')
+            testingAcct.id = res.body.id;
             done()
         })
 
@@ -96,10 +95,31 @@ describe('loginSystem', () => {
             })
     })
 
-})
+    it('should delete newly created account on DELETE request /api/user/admin/:id', (done) => {
+        chai.request(server)
+            .delete('/api/user/admin/' + testingAcct.id)
+            .set('Authorization', `Bearer ${token}`)
+            .end((err, res) => {
+                
+               if (err) {
+                   console.log(err)
+                   done()
+               }
+               
+                res.should.have.status(200)
+                res.body.should.be.a('object')
+                res.body.should.have.property('message')
+                res.body.message.should.equal("success")
+                done()
+        })
 
+    })
+});
 
-const file = fs.readFileSync(path.resolve(__dirname, './testFiles/sample.pdf'), 'base64')
+const fileName = 'sample.pdf'
+const fileType = 'application/pdf'
+const filePath = path.resolve(__dirname, `./testFiles/${fileName}`)
+const file = fs.readFileSync(filePath, 'base64')
 let id 
 
 describe('fileSystem', () => {
@@ -109,9 +129,9 @@ describe('fileSystem', () => {
         .post('/api/file')
         .send({
             'file': file,
-            'fileName': 'sample.pdf',
-            'fileType': 'application/pdf',
-            'fileStatus': 'sample'
+            'fileName': fileName,
+            'fileType': fileType,
+            'fileStatus': 'testing'
         })
         .set('Authorization', `Bearer ${token}`)
         .end( (error, res) => {
@@ -142,6 +162,8 @@ describe('fileSystem', () => {
                 done();
             }
 
+            res.headers['content-type'].should.equal(fileType);
+            res.headers['content-disposition'].should.equal(`attachment; filename=${fileName}`);
             res.should.have.status(200);
             done();
         });
