@@ -116,6 +116,29 @@ const getFile = async (req, res) => {
     return;
 }
 
+//todo: change file status?
+
+const updateFileStatus = async (req, res) => {
+
+    const fileId = req.body.fileId;
+    const fileStatus = req.body.fileStatus;
+
+    const updateQuery = {
+        text: 'UPDATE file SET status = $1 WHERE id = $2',
+        values: [fileStatus, fileId]
+    }
+
+    await pool.query(updateQuery)
+
+    res.status(200).send({
+        'message': `File with id ${fileId} updated successfully to ${fileStatus}`,
+        'fileId': fileId
+    })
+
+    return
+
+}
+
 
 module.exports = {
     uploadFile,
