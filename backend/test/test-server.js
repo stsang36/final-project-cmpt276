@@ -15,11 +15,16 @@ console.log(`Database URL: ${process.env.DATABASE_URL}`)
 
 //initiaite the tests poggers
 
+<<<<<<< HEAD
 const adminAcct = {
+=======
+const testingAcct = {
+>>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
     "username": "admin",
     "password": "admin"
 }
 
+<<<<<<< HEAD
 testingAcct = {
     "email": "test@gmail.com",
     "username": "testing",
@@ -80,6 +85,14 @@ describe('loginSystem', () => {
     })
 
     it('should login to newly created account on POST request /api/user/login', (done) => {
+=======
+
+
+//read file from /testFiles and convert to base64
+
+describe('login', () => {
+    it('should return a token POST request /api/user/login', (done) => {
+>>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
         chai.request(server)
             .post('/api/user/login')
             .send(testingAcct)
@@ -92,6 +105,7 @@ describe('loginSystem', () => {
                 res.should.have.status(200)
                 res.body.should.be.a('object')
                 res.body.should.have.property('token')
+<<<<<<< HEAD
                 done()
             })
     })
@@ -99,11 +113,24 @@ describe('loginSystem', () => {
 })
 
 
+=======
+                token = res.body.token
+                done()
+            })
+    })
+})
+
+
+
+>>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
 const file = fs.readFileSync(path.resolve(__dirname, './testFiles/sample.pdf'), 'base64')
 let id 
 
 describe('fileSystem', () => {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
     it('should upload a file for a POST on /api/file', (done) => {
         chai.request(server)
         .post('/api/file')
@@ -148,8 +175,12 @@ describe('fileSystem', () => {
     })
 
     it('should delete a file for a DELETE on /api/file', (done) => {
+<<<<<<< HEAD
         chai.request(server)
         .delete('/api/file').send({
+=======
+        chai.request(server).delete('/api/file').send({
+>>>>>>> 180036e0f4f1c010541d9e9c7ec027cf83924694
             'fileId': id,
         })
         .set('Authorization', `Bearer ${token}`)
