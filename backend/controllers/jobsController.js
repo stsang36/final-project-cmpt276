@@ -3,22 +3,17 @@ require('express-async-errors')
 
 //
 //  @route    GET /api/job
-//  @desc     Get all available jobs by role; if client, return owned jobs only
-//  @access   PRIVATE (all roles)
-const getJobsByRole = async (req, res) => {
+//  @desc     Get all available jobs by role
+//  @access   PRIVATE (transcriber and reviewer)
+const getAvailableJobs = async (req, res) => {
   const { role } = req.user
-  if(role === 'client'){
+  if(role === 'client' || role === 'admin'){
     res.status(401)
     throw new Error('unauthorized access')
   }
   let getJobsByRoleQuery = {
     text: '',
     values: []
-  }
-  if(role === 'admin'){
-    getJobsByRoleQuery = {
-      text: 'SELECT * from job',
-    }
   }
   if(role === 'transcriber'){
     getJobsByRoleQuery = {
@@ -34,6 +29,29 @@ const getJobsByRole = async (req, res) => {
   }
   const result = await pool.query(getJobsByRoleQuery)
   res.status(200).json(result.rows)
+}
+//  @route    GET /api/job/admin/active
+//  @desc     Gets all active jobs
+//  @access   PRIVATE (admin only)
+const getAllActiveJobs = async(req, res) => {
+  if(req.user.role !== 'admin'){
+    res.status(401)
+    throw new Error('unauthorized access')
+  }
+  const results = await pool.query('SELECT * FROM job WHERE active = TRUE')
+  res.status(200).json(results.rows)
+}
+
+//  @route    GET /api/job/admin/inactive
+//  @desc     Gets all inactive jobs
+//  @access   PRIVATE (admin only)
+const getAllInactiveJobs = async(req, res) => {
+  if(req.user.role !== 'admin'){
+    res.status(401)
+    throw new Error('unauthorized access')
+  }
+  const results = await pool.query('SELECT * FROM job WHERE active = FALSE')
+  res.status(200).json(results.rows)
 }
 
 // 
@@ -278,7 +296,7 @@ const dropJob = async(req, res) => {
 }
 
 module.exports = { 
-    getJobsByRole,
+    getAvailableJobs,
     getCurrentJobs,
     getPastJobs,
     getMyJobs,
@@ -287,4 +305,6 @@ module.exports = {
     updateJob,
     claimJob,
     dropJob,
+    getAllActiveJobs,
+    getAllInactiveJobs,
   }
