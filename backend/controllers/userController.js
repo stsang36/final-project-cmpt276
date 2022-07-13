@@ -8,7 +8,7 @@ const sendEmail = require('../config/mail')
 // @desc:   retrieves all users from the database and returns an array of users
 // @access: PRIVATE 
 const getAllUsers = async(req, res) => {
-  const getAllUsersQuery = 'SELECT * FROM "user"'
+  const getAllUsersQuery = 'SELECT id, username, email, role FROM "user"'
   const results = await pool.query(getAllUsersQuery)
   res.status(200).json(results.rows)
 }
@@ -86,10 +86,9 @@ const loginUser = async(req, res) => {
   }
 }
 
-// @route:  GET /api/user/settings/:id
-// @desc:   update user data
-// @body:   obj w/ new user obj 
-// @access: PRIVATE (user can only update themselves)
+// @route:  GET /api/user/settings
+// @desc:   gets user their own settings
+// @access: PRIVATE 
 const getUserSettings = async(req, res) => {
   const { id } = req.user
   const getUserSettingsQuery = {
