@@ -13,7 +13,7 @@ export const jobExtendedApiSlice = apiSlice.injectEndpoints({
         }
       }),
     }),
-    getAllJobs: builder.query({
+    getAvailableJobs: builder.query({
       query: () => '/job',
     }),
   })
@@ -21,5 +21,5 @@ export const jobExtendedApiSlice = apiSlice.injectEndpoints({
 
 export const {
   useCreateJobMutation,
-  useGetAllJobsQuery,
+  useGetAvailableJobsQuery,
 } = jobExtendedApiSlice

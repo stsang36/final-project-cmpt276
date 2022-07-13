@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import { logout } from 'redux/slices/authSlice'
 import { toast } from 'react-toastify'
-import { useGetAllJobsQuery } from 'redux/slices/jobSlice'
+import { useGetAvailableJobsQuery } from 'redux/slices/jobSlice'
 import style from './style.module.css'
 import moment from 'moment'
 import { downloadFile } from 'common/utils/fileServices'
@@ -12,7 +12,7 @@ const HomeContainer = () => {
   const { user, token } = useSelector(state => state.auth)
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { data, isLoading, isSuccess, isError } = useGetAllJobsQuery()
+  const { data, isLoading, isSuccess, isError } = useGetAvailableJobsQuery()
 
   const handleLogout = () => {
     dispatch(logout())
@@ -32,10 +32,12 @@ const HomeContainer = () => {
         <section className={style.section}>
           {data && data.map((job, index) => (
             <div className={style.job}>
+              <div>Job ID: {job.id}</div>
               <div>Job Deadline: {moment(job.deadline).format('MMMM Do YYYY, h:mm a')}</div>
               <div>Created At: {moment(job.created_at).format('MMMM Do YYYY, h:mm a')}</div>
               <div>Owner ID:  {job.owner_id}</div>
               <div>Status: {job.status}</div>
+              <div>Claimed User: {job.claimed_userid}</div>
               <div className={style.btns}>
                 <button
                   className={style.btn} 
