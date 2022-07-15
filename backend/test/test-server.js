@@ -51,6 +51,10 @@ before( () => {
 })
 
 describe('loginSystem', () => {
+
+    let testToken = null
+    let testId = null
+
     it('should register a new user on a POST request /api/user', (done) => { 
         chai.request(server)
         .post('/api/user')
@@ -73,6 +77,8 @@ describe('loginSystem', () => {
             res.body.token.should.be.a('string')
             res.body.id.should.be.a('number')
             testingAcct.id = res.body.id;
+            testToken = res.body.token
+            testId = res.body.id
             done()
         })
 
@@ -94,6 +100,103 @@ describe('loginSystem', () => {
                 done()
             })
     })
+
+    it('should get the latest account settings on GET /api/user/settings using own token', (done) => {
+
+        chai.request(server)
+            .get(`/api/user/settings`)
+            .set('Authorization', `Bearer ${testToken}`)
+            .end((err, res) => {
+                if (err) {
+                    console.log(err)
+                    done()
+                }
+                res.should.have.status(200)
+                res.should.be.json
+                res.body.should.be.a('object')
+                res.body.should.have.property('id')
+                res.body.should.have.property('username')
+                res.body.should.have.property('email')
+                res.body.should.have.property('discordId')
+                res.body.should.have.property('toggleDiscordPm')
+                res.body.should.have.property('toggleEmailNotification')
+                res.body.username.should.equal(testingAcct.username)
+                res.body.email.should.equal(testingAcct.email)
+                done()
+            })
+    })
+
+
+    it('should update the account settings on PUT /api/user/settings', (done) => {
+
+        let updatedSettings = {         
+            "id": testId,     
+            "username": "testingUpdated",
+            "email": "testingUpdated@gmail.com",
+            "discordId": "123456789",
+            "toggleDiscordPm": true,
+            "toggleEmailNotification": true
+        }
+
+        chai.request(server)
+            .put(`/api/user/settings`)
+            .set('Authorization', `Bearer ${testToken}`)
+            .send(updatedSettings)
+            .end((err, res) => {
+                if (err) {
+                    console.log(err)
+                    done()
+
+                }
+                res.should.have.status(200)
+                res.should.be.json
+                res.body.should.have.property('username')
+                res.body.should.have.property('email')
+                res.body.username.should.equal(updatedSettings.username)
+                res.body.email.should.equal(updatedSettings.email)
+                done()
+            })
+
+        
+    })
+
+    it('should update user role on PUT /api/user/admin', (done) => {
+        
+        chai.request(server)
+            .put(`/api/user/admin`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                "id": testId,
+                "role": "reviewer"
+            })
+            .end((err, res) => {
+                if (err) {
+                    console.log(err)
+                    done()
+                }
+                res.should.have.status(200)
+                res.should.be.json
+                res.body.message.should.equal("success")
+                done()
+            })
+    })
+
+    it('should get all users with admin token on GET /api/user/', (done) => {
+        chai.request(server)
+            .get(`/api/user/`)
+            .set('Authorization', `Bearer ${token}`)
+            .end((err, res) => {
+                if (err) {
+                    console.log(err)
+                    done()
+                }
+                res.should.have.status(200)
+                res.should.be.json
+                res.body.should.be.a('array')
+                done()
+            })
+    })
+
 
     it('should delete newly created account on DELETE request /api/user/admin/:id', (done) => {
         chai.request(server)
