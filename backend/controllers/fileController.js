@@ -7,7 +7,7 @@ require('express-async-errors')
 // @body:   obj w/ file, fileName, fileType, and fileStatus
 // @access: PRIVATE
 const uploadFile = async (req, res) => {
-
+  
     const file = req.body.file
     const fileName = req.body.fileName
     const fileType = req.body.fileType
