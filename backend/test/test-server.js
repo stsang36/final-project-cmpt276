@@ -1,9 +1,6 @@
 const dotenv = require('dotenv')
 const path = require('path')
 dotenv.config({path: '../.env'})
-const chai = require('chai')
-const chaiHttp = require('chai-http')
-
 
 const { 
     loginCheck, 
@@ -25,15 +22,10 @@ const {
 } = require('./tests/fileTest')
 
 
-chai.use(chaiHttp)
-chai.should()
-
 console.log(`Environment Port: ${process.env.PORT}`)
 console.log(`Database URL: ${process.env.DATABASE_URL}`)
 
 //initiaite the tests poggers
-
-//read file from /testFiles and convert to base64
 
 before( async () => {
     it('should eat a bagel', (done) => {done()})
