@@ -30,7 +30,7 @@ const testingAcct = {
 //read file from /testFiles and convert to base64
 
 before( () => {
-    it('should login with admin account for further testing', (done) => {
+    it('should login with admin account for further testing of admin tools', (done) => {
         chai.request(server)
         .post('/api/user/login')
         .send(adminAcct)
@@ -40,7 +40,6 @@ before( () => {
                 console.log(err)
                 done()
             }
-
             res.should.have.status(200)
             res.body.should.be.a('object')
             res.body.should.have.property('token')
@@ -48,6 +47,8 @@ before( () => {
             done()
         })
     })
+
+    it('should eat a bagel', (done) => {done()})
 })
 
 describe('loginSystem', () => {
@@ -126,6 +127,22 @@ describe('loginSystem', () => {
             })
     })
 
+    it ('should email user on forgetPassword on POST /api/user/forgotpassword/:user' , (done) => {
+        chai.request(server)
+            .post(`/api/user/forgotpassword/${testingAcct.username}`)
+            .end((err, res) => {
+                if (err) {
+                    console.log(err)
+                    done()
+                }
+                res.should.have.status(200)
+                res.should.be.json
+                res.body.should.have.property('message')
+                res.body.message.should.equal('success')
+                done()
+            })
+    })
+
 
     it('should update the account settings on PUT /api/user/settings', (done) => {
 
@@ -159,6 +176,66 @@ describe('loginSystem', () => {
 
         
     })
+  
+
+    it('should update user password on PUT /api/user/settings/changepassword', (done) => {
+            
+            let updatedPassword = {         
+                "id": testId,     
+                "oldPassword": "testing",
+                "newPassword": "testingUpdated"
+            }
+    
+            chai.request(server)
+                .put(`/api/user/settings/changepassword`)
+                .set('Authorization', `Bearer ${testToken}`)
+                .send(updatedPassword)
+                .end((err, res) => {
+                    if (err) {
+                        console.log(err)
+                        done()
+    
+                    }
+                    res.should.have.status(200)
+                    res.should.be.json
+                    res.body.message.should.equal('success')
+                    done()
+                })
+    
+            
+    })
+
+    xit('should reset user password on PUT /api/user/resetpassword', (done) => {
+                
+                let resetPasswordData = {    
+                    "token": myResetToken,
+                    "password": "myNewPassword"
+                }
+        
+                chai.request(server)
+                    .put(`/api/user/resetpassword`)
+                    .send(resetPasswordData)
+                    .end((err, res) => {
+                        if (err) {
+                            console.log(err)
+                            done()
+        
+                        }
+                        res.should.have.status(200)
+                        res.should.be.json
+                        res.body.should.have.property('id')
+                        res.body.should.have.property('username')
+                        res.body.should.have.property('email')
+                        res.body.should.have.property('role')
+                        res.body.should.have.property('token')
+                        res.body.username.should.equal(resetPasswordData.username)
+                        res.body.email.should.equal(resetPasswordData.email)
+                        res.body.token.should.not.equal(testToken)
+                        done()
+                    })
+        
+                
+    }) 
 
     it('should update user role on PUT /api/user/admin', (done) => {
         
