@@ -21,67 +21,74 @@ chai.should()
 
 const uploadFileCheck = (done) => {
     chai.request(server)
-    .post('/api/file')
-    .send({
-        'file': file,
-        'fileName': fileName,
-        'fileType': fileType,
-        'fileStatus': 'testing'
-    })
-    .set('Authorization', `Bearer ${adminToken}`)
-    .end( (error, res) => {
+        .post('/api/file')
+        .send({
+            'file': file,
+            'fileName': fileName,
+            'fileType': fileType,
+            'fileStatus': 'testing'
+        })
+        .set('Authorization', `Bearer ${adminToken}`)
+        .end( (error, res) => {
 
-        if (error) {
-            console.log(error)
+            if (error) {
+                console.log(error)
+                done();
+            }
+
+            res.should.have.status(200);
+            res.should.be.json;
+            res.body.fileId.should.be.a('number');
+            res.body.message.should.equal('File uploaded successfully');
+            id = res.body.fileId;
             done();
-        }
-
-        res.should.have.status(200);
-        res.should.be.json;
-        res.body.fileId.should.be.a('number');
-        res.body.message.should.equal('File uploaded successfully');
-        id = res.body.fileId;
-        done();
-    });
+        });
 }
 
 const getFileCheck = (done) => {
     chai.request(server)
-    .get(`/api/file/${id}`)
-    .set('Authorization', `Bearer ${adminToken}`)
-    .end( (error, res) => {
-        
-        if (error) {
-            console.log(error)
-            done();
-        }
+        .get(`/api/file/${id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .end( (error, res) => {
+            
+            if (error) {
+                console.log(error)
+                done();
+            }
 
-        res.headers['content-type'].should.equal(fileType);
-        res.headers['content-disposition'].should.equal(`attachment; filename=${fileName}`);
-        res.should.have.status(200);
-        done();
-    });
+            res.headers['content-type'].should.equal(fileType);
+            res.headers['content-disposition'].should.equal(`attachment; filename=${fileName}`);
+            res.should.have.status(200);
+            done();
+        });
 }
 
 const deleteFileCheck = (done) => {
     chai.request(server)
-    .delete('/api/file').send({
-        'fileId': id,
-    })
-    .set('Authorization', `Bearer ${adminToken}`)
-    .end( (error, res) => {
-        
-        if (error) {
-            console.log(error)
-            done();
-        }
+        .delete('/api/file')
+        .send({
+            'fileId': id,
+        })
+        .set('Authorization', `Bearer ${adminToken}`)
+        .end( (error, res) => {
+            
+            if (error) {
+                console.log(error)
+                done();
+            }
 
-        res.should.have.status(200);
-        res.should.be.json;
-        res.body.fileId.should.be.a('number');
-        res.body.message.should.equal(`ID: ${id} deleted successfully.`);
-        done();
-    });
+            res.should.have.status(200);
+            res.should.be.json;
+            res.body.fileId.should.be.a('number');
+            res.body.message.should.equal(`ID: ${id} deleted successfully.`);
+            done();
+        });
 }
 
-module.exports = { uploadFileCheck, getFileCheck, deleteFileCheck }
+
+
+module.exports = { 
+    uploadFileCheck, 
+    getFileCheck, 
+    deleteFileCheck
+}
