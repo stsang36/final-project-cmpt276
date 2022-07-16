@@ -1,0 +1,9 @@
+.homeContainer{
+  border: 3px solid blue;
+}
+
+.h1{
+  font-size: 2rem;
+  font-weight: 500;
+  padding: 2rem;
+}

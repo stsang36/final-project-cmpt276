@@ -1,11 +1,13 @@
 import style from './style.module.css'
 
-const Button = ({text, onClick, className}) => 
+const Button = ({text, onClick, className, disabled}) => 
 {
   return (
     <button 
       className={`${style.button} ${className}`}
-      onClick={onClick}>
+      onClick={onClick}
+      disabled={disabled}
+    >
       {text}
     </button>
   )

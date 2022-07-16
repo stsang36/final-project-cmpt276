@@ -1,12 +1,15 @@
-import React from 'react'
+import Sidebar from '../Sidebar'
+import Footer from '../Footer'
+import style from './style.module.css'
+import { Outlet } from 'react-router-dom'
 
-const Layout = ({children}) => {
+const Layout = () => {
   return (
-    <>
-      {/* can put a header here */}
-      {children}
-      {/* can put a footer here */}
-    </>
+    <div className={style.layout}>
+      <Sidebar />
+      <Outlet />
+      {/* <Footer /> */}
+    </div>
   )
 }
 

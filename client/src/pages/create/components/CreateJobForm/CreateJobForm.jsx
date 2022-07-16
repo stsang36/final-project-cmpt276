@@ -6,6 +6,7 @@ import moment from 'moment'
 import { useCreateJobMutation } from 'redux/slices/jobSlice'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import FileInput from '../../../../common/components/FileInput'
 
 const CreateJobForm = () => {
   const navigate = useNavigate()
@@ -13,33 +14,22 @@ const CreateJobForm = () => {
   const ref = useRef()
   const [ deadline, setDeadline ] = useState(moment().add(1, 'day').format())
   const [ createJob, results ] = useCreateJobMutation()
+  const [ disableSubmit, setDisableSubmit ] = useState(false)
 
   const handleSubmit = (event) => {
     event.preventDefault()
     if(!file || !deadline){
+      toast.warn('Must include deadline and file')
       return
     }
     createJob({file, deadline})
-  }
-
-  const handleInputChange = async(event) => {
-    const file = event.target.files[0]
-    const arrBuf = await file.arrayBuffer()
-    const buf = Buffer.from(arrBuf, 'base64')
-    const base64Str = buf.toString('base64')
-    setFile({
-      name: file.name,
-      media: base64Str,
-      type: file.type,
-      status: 'transcribe',
-    })
   }
 
   const handleDateTimeChange = (event) => {
     const { value } = event.target
     const datetime = moment(value).format()
     if(moment().add(1, 'day').isAfter(moment(value))){
-      alert('invalid time')
+      toast.warn("deadlines cannot be set within 24 hours")
       ref.current.value = moment().add(1, 'day').format('YYYY-MM-DDThh:mm')
       return
     }
@@ -61,21 +51,30 @@ const CreateJobForm = () => {
 
   return (
     <form className={style.form}>
-      <h1 className={style.h1}>Create a new job request here</h1>
-      <input 
-        type='file'
-        accept='.pdf, .docx, .pptx, .rtf, .zip, .md'
-        onChange={handleInputChange}
+      <h1 className={style.h1}>Job Form</h1>
+      <FileInput 
+        maxFiles={3}
+        setSubmitFile={setFile}
+        status='transcribe'
+        setDisableSubmit={setDisableSubmit}
+        supportedExtensions={['pdf', 'doc', 'docx', 'pptx', 'rtf', 'zip', 'md']}
       />
-      <input
-        type='datetime-local'
-        onBlur={handleDateTimeChange}
-        defaultValue={moment().add(1, 'day').format('YYYY-MM-DDThh:mm')}  // default value is a day from now
-        ref={ref}
-      />
+      <label for='deadlineInput' className={style.deadlineInput}>
+        Select a deadline:
+        <input
+          className={style.inputDate} 
+          type='datetime-local'
+          onBlur={handleDateTimeChange}
+          defaultValue={moment().add(1, 'day').format('YYYY-MM-DDThh:mm')}  // default value is a day from now
+          ref={ref}
+          id='deadlineInput'
+        />
+      </label>
       <Button 
+        className={style.submitBtn}
         text='Submit'
         onClick={handleSubmit}
+        disabled={disableSubmit}
       />
     </form>
   )

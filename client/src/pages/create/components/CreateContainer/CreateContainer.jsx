@@ -6,11 +6,12 @@ import CreateJobForm from '../CreateJobForm'
 const createContainer = () => {
   return (
     <Protect>
-      <Layout>
-        <main className={style.createContainer}>
-          <CreateJobForm />
-        </main>
-      </Layout>
+      <main className={style.createContainer}>
+        <header>
+          <h1 className={style.h1}>Create Job</h1>
+        </header>
+        <CreateJobForm />
+      </main>
     </Protect>
   )
 }

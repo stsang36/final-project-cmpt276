@@ -1,0 +1,111 @@
+.hide{
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+}
+
+.fileInput{
+  border: 1px solid green;
+  width: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
+.dragOver{
+  background: grey;
+  border: red;
+}
+
+.file{
+  width: 100%;
+  display: grid;
+  grid-template-areas: 'icon fileName delete'
+                       'icon fileSize delete';
+  grid-template-columns: 2.5rem minmax(0, 1fr) 1rem;
+}
+
+.dropzone{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.uploadIcon{
+  font-size: 5rem;
+}
+
+.fileIcon{
+  font-size: 2rem;
+  grid-area: icon;
+  justify-self: center;
+  align-self: center;
+}
+
+.fileName{
+  grid-area: fileName;
+  font-size: 1rem;
+}
+
+.fileSize{
+  grid-area: fileSize;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.fileDeleteIcon{
+  font-size: 1.2rem;
+  grid-area: delete;
+  justify-self: center;
+  align-self: center;
+  background: none;
+  border: none;
+}
+
+.fileDeleteIcon:hover{
+  color: crimson;
+}
+
+.dropZoneHover{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 4px dashed grey;
+  animation: tilt-n-move-shaking 0.4s infinite;
+}
+
+@keyframes tilt-n-move-shaking {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(1px, 1px) rotate(1deg); }
+  50% { transform: translate(0, 0) rotate(0eg); }
+  75% { transform: translate(-1px, 1px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.selectFilesBtn{
+  border: none;
+  padding: 0.5rem 3rem;
+  font-size: 1.1rem;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.filesInfo{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.9rem;
+  gap: 0.25rem
+}
+
+.fileNameInput{
+  padding: 0.5rem 1rem;
+}
