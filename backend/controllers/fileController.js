@@ -4,7 +4,7 @@ require('express-async-errors')
 
 // @route:  POST /api/file
 // @desc:   uploads a new file to 'file' table
-// @body:   obj w/ file, fileName, fileType, and fileStatus
+// @body:   obj w/ file, fileName, fileType, and fileStatus(if not is given, defaults to 'transcribe')
 // @access: PRIVATE
 const uploadFile = async (req, res) => {
   
@@ -13,9 +13,13 @@ const uploadFile = async (req, res) => {
     const fileType = req.body.fileType
     const fileStatus = req.body.fileStatus
 
-    if (!file || !fileName || !fileType || !fileStatus) {
+    if (!file || !fileName || !fileType) {
         res.status(400)
         throw new Error('File upload failed, missing required fields')
+    }
+
+    if (!fileStatus) {
+        fileStatus = null;
     }
 
     const newFile = file.toString('base64')
@@ -68,7 +72,7 @@ const deleteFile = async (req, res) => {
     await pool.query(deleteQuery)
 
     res.status(200).send({
-        'message':`ID: ${fileId} deleted successfuly.`,
+        'message':`ID: ${fileId} deleted successfully.`,
         'fileId': fileId
     })
 
@@ -115,7 +119,6 @@ const getFile = async (req, res) => {
     
     return;
 }
-
 
 module.exports = {
     uploadFile,
