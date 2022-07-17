@@ -188,16 +188,20 @@ const updateJob = async(req, res) => {
   var newActive = true
   var newStatus = ''
   const file = req.body
-  const findJobResults = await pool.query('SELECT status FROM job WHERE id = $1 limit 1', [jobId])
-  const currentStatus = findJobResults.rows[0].status
-  if(currentStatus === 'transcribe'){
+  const findJobResults = await pool.query('SELECT active, status, claimed_userid FROM job WHERE id = $1 limit 1', [jobId])
+  const { status, claimed_userid, active } = findJobResults.rows[0]
+  if(!active || claimed_userid !== id){
+    res.status(401)
+    throw new Error('unauthorized access')
+  }
+  if(status === 'transcribe'){
     if(role === 'reviewer'){
       res.status(401)
       throw new Error('unauthorized access')
     }
     newStatus = 'review'
   }
-  if(currentStatus === 'review'){
+  if(status === 'review'){
     if(role === 'transcriber'){
       res.status(401)
       throw new Error('unauthorized access')

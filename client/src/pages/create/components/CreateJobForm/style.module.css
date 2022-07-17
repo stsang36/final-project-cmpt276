@@ -1,14 +1,39 @@
 .form{
+  align-self: center;
+  justify-self: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: clamp(500px, 600px, 100%);
+  width: clamp(400px, 500px, 100%);
   background: white;
   padding: 2rem;
   gap: 2rem;
+  box-shadow: 6px 8px 20px 3px rgba(160, 160, 160, 0.304);
+  border-radius: 7px;
 }
 
 .h1{
-  font-size: 2rem;
+  font-size: 1.5rem;
+}
 
+.deadlineInput{
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.inputDate{
+  padding: 0.5rem 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.submitBtn{
+  padding: 0.5rem 4rem;
+  border: none;
+  background-color: green;
+  border-radius: 7px;
+  color: white;
+  font-size: 1rem;
 }

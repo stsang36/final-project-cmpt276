@@ -2,8 +2,12 @@ import { toast } from 'react-toastify'
 import { saveAs } from 'file-saver'
 
 export const downloadFile = async(fileId, token) => {
-  if(!token || !fileId){
-    toast.error('No access')
+  if(!token){
+    toast.error('Unauthorized Access')
+    return 
+  }
+  if(!fileId){
+    toast.error('Missing file id')
     return 
   }
   try{
