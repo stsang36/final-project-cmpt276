@@ -13,6 +13,7 @@ const AvailableJobs = () => {
 
   const { token } = useSelector(state => state.auth)
   const handledownload = (event, fileid) => {
+    event.preventDefault()
     downloadFile(fileid, token)
   }
 

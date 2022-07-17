@@ -10,7 +10,7 @@ import { useLoginMutation } from 'redux/slices/userSlice'
 const LoginForm = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [ login, results ] = useLoginMutation()
+  const [login, results] = useLoginMutation()
   const navigate = useNavigate()
 
   const handleKeyPress = (event) => {
@@ -32,11 +32,21 @@ const LoginForm = () => {
     const { isSuccess, isError, error, reset } = results
     if(isSuccess){
       toast.success('Signed In Successfully')
+      const { role } = results.data
+      if(role === 'admin'){
+        navigate('/admin')
+        return
+      }
+      if(role === 'client'){
+        navigate('/create')
+        return
+      }
       navigate('/')
     }
     if(isError){
       toast.error(`An error occured: ${error.data.message}`)
       reset()
+      return
     } 
   },[results, navigate])
 
