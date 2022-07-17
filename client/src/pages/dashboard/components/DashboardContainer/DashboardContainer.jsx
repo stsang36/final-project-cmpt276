@@ -21,7 +21,7 @@ const HomeContainer = () => {
 
   return (
     <Protect>
-      <main className={style.homeContainer}>
+      <main className={style.dashboardContainer}>
         <header>
           <h1 className={style.h1}>Dashboard</h1>
         </header>

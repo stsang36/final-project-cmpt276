@@ -3,11 +3,16 @@ import Button from '../Button'
 import style from './style.module.css'
 import { useDispatch } from 'react-redux'
 import { logout } from 'redux/slices/authSlice'
+import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 const Sidebar = () => {
+  const { role } = useSelector(state => state.auth.user)
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const handleClick = () => {
     dispatch(logout())
+    navigate('/auth/login')
   }
 
   return (
@@ -16,28 +21,32 @@ const Sidebar = () => {
         Bytetools
       </h1>
       <ul className={style.ul}>
-        <li className={style.li}>
-          <Link 
-            to='/'
-            className={style.a}
-          >
-            Dashboard
-          </Link>
-        </li>
+        {(role === 'transcriber' || role === 'reviwer') &&
+          <li className={style.li}>
+            <Link 
+              to='/'
+              className={style.a}
+            >
+              Dashboard
+            </Link>
+          </li>
+        }
+        {role === 'admin' &&
+          <li className={style.li}>
+            <Link 
+              to='/admin'
+              className={style.a}
+            >
+              Admin
+            </Link>
+          </li>
+        }
         <li className={style.li}>
           <Link 
             to='/create'
             className={style.a}
           >
             Create 
-          </Link>
-        </li>
-        <li className={style.li}>
-          <Link 
-            to='/create'
-            className={style.a}
-          >
-            Available Jobs
           </Link>
         </li>
         <li className={style.li}>
