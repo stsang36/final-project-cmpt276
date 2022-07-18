@@ -4,7 +4,7 @@
 Client will send a job request, with the files and deadline, to Bytetools via email/discord. After receiving the request, Bytetools will notify all their transcribers of a new job by email/discord. Transcribers will claim a job by responding to the notification and then they will transcribe the job and submit it to reviewers also through email/discord. The reviewers, after reviewing the job and making changes accordingly, will upload and send the final document to the client via discord/email.
 
 ## Client’s need:
-The client wants a web application to streamline all this work in order to divide all the work between its transcribers and reviewers and communication of jobs through the app. This app will allow clients to submit job requests through the app and track its status. The centralization of all the job requests on one application will keep jobs organized, and workflow efficient. The application should send email and discord notifications to the appropriate individuals at Bytetools when a new job is available to them, as well as clients when a job is complete.
+The client wants a web application to divide this work between its transcribers and reviewers and maintain communication of jobs through the app. This app will allow clients to submit job requests and track its status through the app. The centralization of all the job requests on one application will keep jobs organized, and workflow efficient. When a new job becomes available,the application will send email and discord notifications to the appropriate job handlers at Bytetools, as well as clients when a job is complete.
 
 ### How would the project make the client's life better?
 
