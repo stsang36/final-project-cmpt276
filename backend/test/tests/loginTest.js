@@ -259,7 +259,12 @@ const deleteUserCheck = (done) => {
         })
 }
 
-
+const loginCheckCleanUp = (done) => {
+    pool.query('DELETE FROM \"user\" WHERE username = $1 OR username = $2', ['testing', 'testingUpdated'])
+    .then( () => { 
+        done();
+    })
+}
 
 module.exports = {
     registerCheck,
@@ -271,5 +276,6 @@ module.exports = {
     resetPasswordCheck,
     updateUserRoleCheck,
     getAllUsersCheck,
-    deleteUserCheck
+    deleteUserCheck,
+    loginCheckCleanUp
 }

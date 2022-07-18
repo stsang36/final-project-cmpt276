@@ -13,13 +13,15 @@ const {
     getAllUsersCheck, 
     updateUserRoleCheck, 
     deleteUserCheck, 
-    updatePasswordCheck 
+    updatePasswordCheck, 
+    loginCheckCleanUp
 } = require('./tests/loginTest')
 
 const { 
     uploadFileCheck,
     getFileCheck, 
-    deleteFileCheck 
+    deleteFileCheck, 
+    fileCheckCleanUp
 } = require('./tests/fileTest')
 
 console.log(`Environment Port: ${process.env.PORT}`)
@@ -50,9 +52,6 @@ describe('File System:', () => {
 });
 
 after( () => {
-    pool.query('DELETE FROM \"user\" WHERE username = $1 OR username = $2', ['testing', 'testingUpdated'])
-        .then( () => { 
-            done();
-        })
-
+    loginCheckCleanUp()
+    fileCheckCleanUp()
 })

@@ -15,7 +15,7 @@ const uploadFile = async (req, res) => {
 
     if (!file || !fileName || !fileType) {
         res.status(400)
-        throw new Error('File upload failed, missing required fields')
+        throw new Error('Missing required fields')
     }
 
     if (!fileStatus) {
@@ -25,7 +25,7 @@ const uploadFile = async (req, res) => {
     const newFile = file.toString('base64')
     const newBuf = Buffer.from(newFile, 'base64')
     const insertQuery = {
-        text: 'INSERT into file(name, type, status, media) VALUES ($1, $2, $3, $4) RETURNING id',
+        text: 'INSERT into \"file\"(name, type, status, media) VALUES ($1, $2, $3, $4) RETURNING id',
         values: [fileName, fileType, fileStatus, newBuf]
     }
     const inserted = await pool.query(insertQuery)
@@ -53,7 +53,7 @@ const deleteFile = async (req, res) => {
     }
 
     const findQuery = {
-        text: 'SELECT * FROM file WHERE id = $1',
+        text: 'SELECT * FROM \"file\" WHERE id = $1',
         values: [fileId]
     }
 
@@ -65,7 +65,7 @@ const deleteFile = async (req, res) => {
     }
 
     const deleteQuery = {
-        text: 'DELETE FROM file WHERE id = $1',
+        text: 'DELETE FROM \"file\" WHERE id = $1',
         values: [fileId]
     }
 
@@ -87,7 +87,7 @@ const getFile = async (req, res) => {
     const fileId = req.params['id']; //id should be fileID
 
     const getDataQuery = {
-        text: 'SELECT * FROM file WHERE id = $1',
+        text: 'SELECT * FROM \"file\" WHERE id = $1',
         values: [fileId]
     }
 

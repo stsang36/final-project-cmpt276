@@ -6,6 +6,8 @@ dotenv.config({path: '../../.env'})
 const server = require('../../server')
 const chaiHttp = require('chai-http')
 const getAdminToken = require('./adminToken')
+const { pool } = require('../../config/pool.js')
+
 const fileName = 'sample.pdf'
 const fileType = 'application/pdf'
 const filePath = path.resolve(__dirname, `../testFiles/${fileName}`)
@@ -86,9 +88,17 @@ const deleteFileCheck = (done) => {
 }
 
 
+const fileCheckCleanUp = (done) => {
+    pool.query('DELETE FROM \"file\" WHERE id = $1 or status = $2', [id, 'testing'])
+    .then( () => { 
+        done();
+    })
+}
 
 module.exports = { 
     uploadFileCheck, 
     getFileCheck, 
-    deleteFileCheck
+    deleteFileCheck,
+    fileCheckCleanUp
+
 }
