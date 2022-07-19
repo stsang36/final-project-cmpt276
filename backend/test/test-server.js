@@ -29,6 +29,21 @@ console.log(`Database URL: ${process.env.DATABASE_URL}`)
 
 //initiaite the tests poggers
 
+before(async () => {
+
+    const checkAdminQuery = `SELECT * FROM \"user\" WHERE username = 'admin'`
+    const checkAdmin = await pool.query(checkAdminQuery)
+    if (checkAdmin.rows.length === 0) {
+        const adminInsertQuery = {
+            text: 'INSERT into \"user\" (username, password, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5)',
+            values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S', 'admin', false, false]
+        }
+        await pool.query(adminInsertQuery)
+    }
+
+    return
+})
+
 describe('Login System:', () => {
     it('should register a new user on a POST request /api/user', registerCheck)
     it('should login to newly created account on POST request /api/user/login', loginCheck)
