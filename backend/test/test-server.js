@@ -31,6 +31,10 @@ console.log(`Database URL: ${process.env.DATABASE_URL}`)
 
 before(async () => {
 
+    if (process.env.NODE_ENV !== 'development') {
+        throw new Error('This test suite should only be run in development mode')
+    }
+
     const checkAdminQuery = `SELECT * FROM \"user\" WHERE username = 'admin'`
     const checkAdmin = await pool.query(checkAdminQuery)
     if (checkAdmin.rows.length === 0) {
