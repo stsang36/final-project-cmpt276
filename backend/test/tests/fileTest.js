@@ -34,8 +34,7 @@ const uploadFileCheck = (done) => {
         .end( (error, res) => {
 
             if (error) {
-                console.log(error)
-                done();
+                throw new Error(err)
             }
 
             res.should.have.status(200);
@@ -54,8 +53,7 @@ const getFileCheck = (done) => {
         .end( (error, res) => {
             
             if (error) {
-                console.log(error)
-                done();
+                throw new Error(err)
             }
 
             res.headers['content-type'].should.equal(fileType);
@@ -66,6 +64,11 @@ const getFileCheck = (done) => {
 }
 
 const deleteFileCheck = (done) => {
+
+    if (!adminToken) {
+        throw new Error('Admin token not found')
+    }
+
     chai.request(server)
         .delete('/api/file')
         .send({
@@ -75,8 +78,7 @@ const deleteFileCheck = (done) => {
         .end( (error, res) => {
             
             if (error) {
-                console.log(error)
-                done();
+                throw new Error(err)
             }
 
             res.should.have.status(200);

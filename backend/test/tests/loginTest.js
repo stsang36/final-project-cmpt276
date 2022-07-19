@@ -31,8 +31,7 @@ const registerCheck = (done) => {
         .send(testingAcct)
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
+                throw new Error(err)
             }
 
             res.should.have.status(200)
@@ -55,13 +54,21 @@ const registerCheck = (done) => {
 }
 
 const loginCheck = (done) => {
+    
+    if (!testToken) {
+        throw new Error('Test token not found')
+    }
+
+    if (!testId) {
+        throw new Error('Test id not found')
+    }
+    
     chai.request(server)
         .post('/api/user/login')
         .send(testingAcct)
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
+                throw new Error(err)
             }
 
             res.should.have.status(200)
@@ -72,14 +79,19 @@ const loginCheck = (done) => {
 }
 
 const settingCheck = (done) => {
+
+    if (!testToken) {
+        throw new Error('Test token not found')
+    }
+
     chai.request(server)
         .get(`/api/user/settings`)
         .set('Authorization', `Bearer ${testToken}`)
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
+                throw new Error(err)
             }
+
             res.should.have.status(200)
             res.should.be.json
             res.body.should.be.a('object')
@@ -96,13 +108,14 @@ const settingCheck = (done) => {
 }
 
 const emailCheck = (done) => {
+
     chai.request(server)
         .post(`/api/user/forgotpassword/${testingAcct.username}`)
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
+                throw new Error(err)
             }
+
             res.should.have.status(200)
             res.should.be.json
             res.body.should.have.property('message')
@@ -112,6 +125,14 @@ const emailCheck = (done) => {
 }
 
 const updateSettingCheck = (done) => {
+    if (!testToken) {
+        throw new Error('Test token not found')
+    }
+
+    if (!testId) {
+        throw new Error('Test id not found')
+    }
+    
     let updatedSettings = {
         "id": testId,
         "username": "testingUpdated",
@@ -127,10 +148,9 @@ const updateSettingCheck = (done) => {
         .send(updatedSettings)
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
-
+                throw new Error(err)
             }
+
             res.should.have.status(200)
             res.should.be.json
             res.body.should.have.property('username')
@@ -142,6 +162,14 @@ const updateSettingCheck = (done) => {
 }
 
 const updatePasswordCheck = (done) => {
+    if (!testToken) {
+        throw new Error('Test token not found')
+    }
+
+    if (!testId) {
+        throw new Error('Test id not found')
+    }
+    
     let updatedPassword = {
         "id": testId,
         "oldPassword": "testing",
@@ -154,9 +182,7 @@ const updatePasswordCheck = (done) => {
         .send(updatedPassword)
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
-
+                throw new Error(err)
             }
             res.should.have.status(200)
             res.should.be.json
@@ -166,8 +192,22 @@ const updatePasswordCheck = (done) => {
 }
 
 const resetPasswordCheck = (done) => {
+
+    if (!testToken) {
+        throw new Error('Test token not found')
+    }
+
+    if (!testId) {
+        throw new Error('Test id not found')
+    }
+
     pool.query(`SELECT * FROM \"user\" WHERE id = ${testId}`)
         .then((result) => {
+
+            if (result.rows[0].length === 0) {
+                throw new Error('No user found to reset password!')
+            }
+
             const hashedPassword = result.rows[0].password
             const myResetToken = jwt.sign({
                 id: testId,
@@ -185,8 +225,7 @@ const resetPasswordCheck = (done) => {
                 .send(resetPasswordData)
                 .end((err, res) => {
                     if (err) {
-                        console.log(err)
-                        done()
+                        throw new Error(err)
 
                     }
                     res.should.have.status(200)
@@ -204,6 +243,10 @@ const resetPasswordCheck = (done) => {
 
 }
 const updateUserRoleCheck = (done) => {
+    if (!adminToken) {
+        throw new Error('Admin token not found')
+    }
+
     chai.request(server)
         .put(`/api/user/admin`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -213,8 +256,7 @@ const updateUserRoleCheck = (done) => {
         })
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
+                throw new Error(err)
             }
             res.should.have.status(200)
             res.should.be.json
@@ -224,13 +266,16 @@ const updateUserRoleCheck = (done) => {
 }
 
 const getAllUsersCheck = (done) => {
+    if (!adminToken) {
+        throw new Error('Admin token not found')
+    }
+
     chai.request(server)
         .get(`/api/user/`)
         .set('Authorization', `Bearer ${adminToken}`)
         .end((err, res) => {
             if (err) {
-                console.log(err)
-                done()
+                throw new Error(err)
             }
             res.should.have.status(200)
             res.should.be.json
@@ -241,14 +286,17 @@ const getAllUsersCheck = (done) => {
 
 const deleteUserCheck = (done) => {
 
+    if (!adminToken) {
+        throw new Error('Admin token not found')
+    }
+
     chai.request(server)
         .delete('/api/user/admin/' + testingAcct.id)
         .set('Authorization', `Bearer ${adminToken}`)
         .end((err, res) => {
 
             if (err) {
-                console.log(err)
-                done()
+                throw new Error(err)
             }
 
             res.should.have.status(200)
