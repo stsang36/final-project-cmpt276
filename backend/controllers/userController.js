@@ -227,7 +227,7 @@ const forgotPassword = async(req, res) => {
   const msg = {
     to: email, // change to email
     from: "noreply@Bytetools.ca",
-    subject: "ByteTools Password Reset",
+    subject: "Bytetools Password Reset",
     html: `<h1>Bytetools Account Password Reset</h1><p>To reset password for ${email}, please click on the Reset Link: <a href="${process.env.FRONTEND_URL}/auth/passwordreset/${token}">RESET LINK</a></p><p>If you did not request a password reset, please ignore this email.</p>`
   }
   sendEmail(msg)
