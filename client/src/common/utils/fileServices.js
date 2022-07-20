@@ -11,8 +11,8 @@ export const downloadFile = async(fileId, token) => {
     return 
   }
   try{
-    // const res = await fetch(`http://localhost:5000/api/file/${fileId}`, {
-    const res = await fetch(`/api/file/${fileId}`, {
+    const res = await fetch(`http://localhost:5000/api/file/${fileId}`, {
+    // const res = await fetch(`/api/file/${fileId}`, {
       headers: {
         'authorization': `Bearer ${token}`
       }

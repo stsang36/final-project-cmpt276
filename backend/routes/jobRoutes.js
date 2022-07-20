@@ -33,7 +33,7 @@ router.route('/admin/active').get(protect, getAllActiveJobs)
 
 router.route('/admin/inactive').get(protect, getAllInactiveJobs)
 
-router.route("/admin/delete/:id").delete(deletejob)
+router.route("/admin/delete/:id").delete(protect, deletejob)
 
 
 
