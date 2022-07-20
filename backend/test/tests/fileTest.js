@@ -14,40 +14,45 @@ const filePath = path.resolve(__dirname, `../testFiles/${fileName}`)
 const file = fs.readFileSync(filePath, 'base64')
 let id 
 
-getAdminToken().then( (myToken) => {
-    adminToken = myToken
-})
-
 chai.use(chaiHttp)
 chai.should()
 
 const uploadFileCheck = (done) => {
-    chai.request(server)
-        .post('/api/file')
-        .send({
-            'file': file,
-            'fileName': fileName,
-            'fileType': fileType,
-            'fileStatus': 'testing'
-        })
-        .set('Authorization', `Bearer ${adminToken}`)
-        .end( (error, res) => {
+    getAdminToken().then( (adminToken) => {
+        if (!adminToken) {
+            throw new Error('Admin token not found')
+        }
 
-            if (error) {
-                throw new Error(err)
-            }
+        chai.request(server)
+            .post('/api/file')
+            .send({
+                'file': file,
+                'fileName': fileName,
+                'fileType': fileType,
+                'fileStatus': 'testing'
+            })
+            .set('Authorization', `Bearer ${adminToken}`)
+            .end( (error, res) => {
 
-            res.should.have.status(200);
-            res.should.be.json;
-            res.body.fileId.should.be.a('number');
-            res.body.message.should.equal('File uploaded successfully');
-            id = res.body.fileId;
-            done();
-        });
+                if (error) {
+                    throw new Error(err)
+                }
+
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.fileId.should.be.a('number');
+                res.body.message.should.equal('File uploaded successfully');
+                id = res.body.fileId;
+                done();
+            });
+    })
 }
 
 const getFileCheck = (done) => {
-    chai.request(server)
+    
+    getAdminToken().then( (adminToken) => {
+        
+        chai.request(server)
         .get(`/api/file/${id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .end( (error, res) => {
@@ -61,32 +66,37 @@ const getFileCheck = (done) => {
             res.should.have.status(200);
             done();
         });
+    })
+
+    
 }
 
 const deleteFileCheck = (done) => {
 
-    if (!adminToken) {
-        throw new Error('Admin token not found')
-    }
+    getAdminToken().then( (adminToken) => {
+        if (!adminToken) {
+            throw new Error('Admin token not found')
+        }
 
-    chai.request(server)
-        .delete('/api/file')
-        .send({
-            'fileId': id,
-        })
-        .set('Authorization', `Bearer ${adminToken}`)
-        .end( (error, res) => {
-            
-            if (error) {
-                throw new Error(err)
-            }
+        chai.request(server)
+            .delete('/api/file')
+            .send({
+                'fileId': id,
+            })
+            .set('Authorization', `Bearer ${adminToken}`)
+            .end( (error, res) => {
+                
+                if (error) {
+                    throw new Error(err)
+                }
 
-            res.should.have.status(200);
-            res.should.be.json;
-            res.body.fileId.should.be.a('number');
-            res.body.message.should.equal(`ID: ${id} deleted successfully.`);
-            done();
-        });
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.fileId.should.be.a('number');
+                res.body.message.should.equal(`ID: ${id} deleted successfully.`);
+                done();
+            });
+    })
 }
 
 

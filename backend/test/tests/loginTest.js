@@ -10,11 +10,6 @@ chai.use(chaiHttp)
 
 let testToken = null
 let testId = null
-let adminToken = null
-
-getAdminToken().then((myToken) => {
-    adminToken = myToken
-})
 
 const testingAcct = {
     "email": "steven_tsang@sfu.ca",
@@ -22,7 +17,6 @@ const testingAcct = {
     "password": "testing",
     "id": null
 }
-
 
 const registerCheck = (done) => {
 
@@ -243,68 +237,74 @@ const resetPasswordCheck = (done) => {
 
 }
 const updateUserRoleCheck = (done) => {
-    if (!adminToken) {
-        throw new Error('Admin token not found')
-    }
+    getAdminToken().then((adminToken) => {
+        if (!adminToken) {
+            throw new Error('Admin token not found')
+        }
 
-    chai.request(server)
-        .put(`/api/user/admin`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({
-            "id": testId,
-            "role": "reviewer"
-        })
-        .end((err, res) => {
-            if (err) {
-                throw new Error(err)
-            }
-            res.should.have.status(200)
-            res.should.be.json
-            res.body.message.should.equal("success")
-            done()
-        })
+        chai.request(server)
+            .put(`/api/user/admin`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                "id": testId,
+                "role": "reviewer"
+            })
+            .end((err, res) => {
+                if (err) {
+                    throw new Error(err)
+                }
+                res.should.have.status(200)
+                res.should.be.json
+                res.body.message.should.equal("success")
+                done()
+            })
+    })
 }
 
 const getAllUsersCheck = (done) => {
+
+    getAdminToken().then((adminToken) => {
     if (!adminToken) {
         throw new Error('Admin token not found')
     }
 
-    chai.request(server)
-        .get(`/api/user/`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .end((err, res) => {
-            if (err) {
-                throw new Error(err)
-            }
-            res.should.have.status(200)
-            res.should.be.json
-            res.body.should.be.a('array')
-            done()
-        })
+        chai.request(server)
+            .get(`/api/user/`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .end((err, res) => {
+                if (err) {
+                    throw new Error(err)
+                }
+                res.should.have.status(200)
+                res.should.be.json
+                res.body.should.be.a('array')
+                done()
+            })
+    })
 }
 
 const deleteUserCheck = (done) => {
+    getAdminToken().then((adminToken) => {
+        if (!adminToken) {
+            throw new Error('Admin token not found')
+        }
 
-    if (!adminToken) {
-        throw new Error('Admin token not found')
-    }
+        chai.request(server)
+            .delete('/api/user/admin/' + testingAcct.id)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .end((err, res) => {
 
-    chai.request(server)
-        .delete('/api/user/admin/' + testingAcct.id)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .end((err, res) => {
+                if (err) {
+                    throw new Error(err)
+                }
 
-            if (err) {
-                throw new Error(err)
-            }
-
-            res.should.have.status(200)
-            res.body.should.be.a('object')
-            res.body.should.have.property('message')
-            res.body.message.should.equal("success")
-            done()
-        })
+                res.should.have.status(200)
+                res.body.should.be.a('object')
+                res.body.should.have.property('message')
+                res.body.message.should.equal("success")
+                done()
+            })
+    })
 }
 
 const loginCheckCleanUp = (done) => {

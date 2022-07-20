@@ -23,8 +23,6 @@ const {
     deleteFileCheck, 
     fileCheckCleanUp
 } = require('./tests/fileTest')
-const { doesNotMatch } = require('assert')
-const { TIMEOUT } = require('dns')
 
 let adminCreated = false
 let adminID = null
@@ -47,15 +45,21 @@ before( (done) => {
                 text: 'INSERT into \"user\" (username, password, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5) RETURNING id',
                 values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S', 'admin', false, false]
             }
-            pool.query(adminInsertQuery).then( (result) => {
-                adminID = result.rows[0].id
-                adminCreated = true
-            }).catch( (err) => {
-                throw new Error(err)
-            })
+            pool.query(adminInsertQuery)
+                .then( (result) => {
+                    adminID = result.rows[0].id
+                    adminCreated = true
+
+                    done()
+                })
+                .catch( (err) => {
+                    throw new Error(err)
+                })
+
+        } else {
+            done()
         }
 
-        done()
     }).catch( (err) => {
         throw new Error(err)
     })
@@ -96,9 +100,10 @@ after( (done) => {
         }
         pool.query(adminDeleteQuery).then((result)=> { 
             done() 
-        }).catch( (err) => {
-            throw new Error(err)
         })
+            .catch( (err) => {
+                throw new Error(err)
+            })
     } else {
         done()
     }
