@@ -24,10 +24,11 @@ const {
     fileCheckCleanUp
 } = require('./tests/fileTest')
 
+let adminCreated = false
+
 console.log(`Environment Port: ${process.env.PORT}`)
 console.log(`Database URL: ${process.env.DATABASE_URL}`)
 
-//initiaite the tests poggers
 
 before(async () => {
 
@@ -35,6 +36,7 @@ before(async () => {
         throw new Error('This test suite should only be run in development mode')
     }
 
+    // Create admin account if it doesn't exist
     const checkAdminQuery = `SELECT * FROM \"user\" WHERE username = 'admin'`
     const checkAdmin = await pool.query(checkAdminQuery)
     if (checkAdmin.rows.length === 0) {
@@ -43,6 +45,7 @@ before(async () => {
             values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S', 'admin', false, false]
         }
         await pool.query(adminInsertQuery)
+        adminCreated = true
     }
 
     return
@@ -70,7 +73,13 @@ describe('File System:', () => {
     
 });
 
-after( () => {
+after( async () => {
     loginCheckCleanUp()
     fileCheckCleanUp()
+
+    // Delete admin account if created by this test suite
+    if (adminCreated) {
+        const adminDeleteQuery = `DELETE FROM \"user\" WHERE username = 'admin'`
+        await pool.query(adminDeleteQuery)
+    }
 })

@@ -226,9 +226,9 @@ const forgotPassword = async(req, res) => {
   const token = jwt.sign({id: id, password: password}, process.env.JWT_SECRET, {expiresIn: "3h"})
   const msg = {
     to: email, // change to email
-    from: "chowcarlin@gmail.com",
+    from: "noreply@Bytetools.ca",
     subject: "ByteTools Password Reset",
-    text: `Reset password here: http://localhost:3000/auth/passwordreset/${token}`
+    html: `<h1>Bytetools Account Password Reset</h1><p>To Reset Password for ${email}, Click on the Reset Link: <a href="${process.env.FRONTEND_URL}/auth/passwordreset/${token}">RESET LINK</a></p><p>If you did not request a password reset, please ignore this email.</p>`
   }
   sendEmail(msg)
   res.status(200).json({message: 'success'})

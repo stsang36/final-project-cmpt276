@@ -17,7 +17,7 @@ getAdminToken().then((myToken) => {
 })
 
 const testingAcct = {
-    "email": "test@gmail.com",
+    "email": "steven_tsang@sfu.ca",
     "username": "testing",
     "password": "testing",
     "id": null
