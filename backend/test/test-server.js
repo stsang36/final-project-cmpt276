@@ -23,14 +23,17 @@ const {
     deleteFileCheck, 
     fileCheckCleanUp
 } = require('./tests/fileTest')
+const { doesNotMatch } = require('assert')
+const { TIMEOUT } = require('dns')
 
 let adminCreated = false
+let adminID = null
 
 console.log(`Environment Port: ${process.env.PORT}`)
 console.log(`Database URL: ${process.env.DATABASE_URL}`)
 
 
-before(async () => {
+before( (done) => {
 
     if (process.env.NODE_ENV !== 'development') {
         throw new Error('This test suite should only be run in development mode')
@@ -38,17 +41,25 @@ before(async () => {
 
     // Create admin account if it doesn't exist
     const checkAdminQuery = `SELECT * FROM \"user\" WHERE username = 'admin'`
-    const checkAdmin = await pool.query(checkAdminQuery)
-    if (checkAdmin.rows.length === 0) {
-        const adminInsertQuery = {
-            text: 'INSERT into \"user\" (username, password, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5)',
-            values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S', 'admin', false, false]
+    pool.query(checkAdminQuery).then((checkAdmin) => {
+        if (checkAdmin.rowCount === 0) {
+            const adminInsertQuery = {
+                text: 'INSERT into \"user\" (username, password, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S', 'admin', false, false]
+            }
+            pool.query(adminInsertQuery).then( (result) => {
+                adminID = result.rows[0].id
+                adminCreated = true
+            }).catch( (err) => {
+                throw new Error(err)
+            })
         }
-        await pool.query(adminInsertQuery)
-        adminCreated = true
-    }
 
-    return
+        done()
+    }).catch( (err) => {
+        throw new Error(err)
+    })
+    
 })
 
 describe('Login System:', () => {
@@ -73,13 +84,22 @@ describe('File System:', () => {
     
 });
 
-after( async () => {
+after( (done) => {
     loginCheckCleanUp()
     fileCheckCleanUp()
 
     // Delete admin account if created by this test suite
     if (adminCreated) {
-        const adminDeleteQuery = `DELETE FROM \"user\" WHERE username = 'admin'`
-        await pool.query(adminDeleteQuery)
+        const adminDeleteQuery = {
+            text: 'DELETE FROM \"user\" WHERE id = $1',
+            values: [adminID]
+        }
+        pool.query(adminDeleteQuery).then((result)=> { 
+            done() 
+        }).catch( (err) => {
+            throw new Error(err)
+        })
+    } else {
+        done()
     }
 })
