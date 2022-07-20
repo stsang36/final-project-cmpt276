@@ -4,8 +4,32 @@
   width: clamp(600px, 700px, 100%);
 }
 
+.showcase{
+  width: 50%;
+  display: flex;
+  flex-direction: columm;
+  justify-content: flex-start;
+  position: relative;
+}
+
 .img{
+  width: 100%;
+  border-top-left-radius: 3%;
+  border-bottom-left-radius: 3%;
   /* box-shadow: x y blur spread  */
   box-shadow: -6px 8px 20px 3px rgba(160, 160, 160, 0.308);
-  width: 50%;
 }
+
+.registerText
+{
+  color: white;
+  left: 0;
+  top: 1rem;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  font-size: 2rem;
+  padding: 2rem 1rem;
+}
+

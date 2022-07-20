@@ -56,7 +56,7 @@ export const jobExtendedApiSlice = apiSlice.injectEndpoints({
     // admin only
     deleteJob: builder.mutation({
       query: ({id}) => ({
-        url: `/job/admin/delete${id}`,
+        url: `/job/admin/delete/${id}`,
         method: 'DELETE'
       }),
       invalidatesTags: ['Job']

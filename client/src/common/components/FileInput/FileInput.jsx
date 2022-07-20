@@ -17,7 +17,7 @@ const generateAcceptedExtStr = (extensionsArray) => {
   return string
 }
 
-const FileInput = ({className, supportedExtensions, setSubmitFile, maxFiles, maxSize, setDisableSubmit, status}) => {
+const FileInput = ({className, supportedExtensions, setSubmitFile, maxFiles, maxSize = 52428800, setDisableSubmit, status}) => {
   const inputFile = useRef(null)
   const [files, setFiles]= useState([])
   const [isDragOver, setIsDragOver] = useState(false)

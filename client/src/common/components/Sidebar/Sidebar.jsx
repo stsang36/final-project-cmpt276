@@ -7,7 +7,8 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
 const Sidebar = () => {
-  const { role } = useSelector(state => state.auth.user)
+  const { user } = useSelector(state => state.auth)
+  const role = user ? user.role : null
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const handleClick = () => {
@@ -15,6 +16,9 @@ const Sidebar = () => {
     navigate('/auth/login')
   }
 
+  if(!user){
+    return (<></>)
+  }
   return (
     <nav className={style.nav}>
       <h1 className={style.h1}>
