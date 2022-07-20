@@ -226,11 +226,17 @@ const forgotPassword = async(req, res) => {
   const token = jwt.sign({id: id, password: password}, process.env.JWT_SECRET, {expiresIn: "3h"})
   const msg = {
     to: email, // change to email
-    from: "noreply@Bytetools.ca",
+    from: "pikaman89@gmail.com",
     subject: "Bytetools Password Reset",
     html: `<h1>Bytetools Account Password Reset</h1><p>To reset password for ${email}, please click on the Reset Link: <a href="${process.env.FRONTEND_URL}/auth/passwordreset/${token}">RESET LINK</a></p><p>If you did not request a password reset, please ignore this email.</p>`
   }
-  sendEmail(msg)
+
+  try {
+    sendEmail(msg)
+  } catch(err) {
+    res.status(400)
+    throw new Error('Email failed to send')
+  } 
   res.status(200).json({message: 'success'})
 }
 
