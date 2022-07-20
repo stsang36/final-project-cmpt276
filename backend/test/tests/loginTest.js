@@ -12,7 +12,7 @@ let testToken = null
 let testId = null
 
 const testingAcct = {
-    "email": "steven_tsang@sfu.ca",
+    "email": "steven_tsang@sfu.ca", // you can change this to spam your own email
     "username": "testing",
     "password": "testing",
     "id": null

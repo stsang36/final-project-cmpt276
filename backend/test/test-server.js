@@ -24,12 +24,20 @@ const {
     fileCheckCleanUp
 } = require('./tests/fileTest')
 
+// keeps track of the created admin account
 let adminCreated = false
 let adminID = null
 
+// please make sure that .env file is set to development and has the following variables:
+console.log(`Environment Type: ${process.env.NODE_ENV}`)
 console.log(`Environment Port: ${process.env.PORT}`)
 console.log(`Database URL: ${process.env.DATABASE_URL}`)
+console.log(`JWT Secret: ${process.env.JWT_SECRET}`)
+console.log(`FRONT END URL: ${process.env.FRONTEND_URL}`)
+console.log(`SendGrid API KEY (DO NOT SHARE): ${process.env.SENDGRID_API_KEY}`)
 
+
+console.log("\n!! Please make sure SSL mode is turned off for this test to work locally! !!\n!! All data tables must be present for the tests to pass! !!\n")
 
 before( (done) => {
 
