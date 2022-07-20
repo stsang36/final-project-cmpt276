@@ -109,15 +109,20 @@ const getPastJobs = async(req, res) => {
 //  @access   PRIVATE (ADMIN)
 const deletejob = async (req,res) => { 
   if(req.user.role !== 'admin'){
+    console.log('i am not admin')
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const { id: jobId  } = req.params.id
+  const { id: jobId  } = req.params
   const selectJobQuery = {
     text: 'SELECT transcribe_fileid, review_fileid, complete_fileid FROM job WHERE id = $1 limit 1',
     values: [jobId] 
   }
   const selectJobResult = await pool.query(selectJobQuery)
+  if(!selectJobResult.rows[0]){
+    res.status(400)
+    throw new Error('job not found')
+  }
   const { transcribe_fileid, review_fileid, complete_fileid } = selectJobResult.rows[0]
   const deleteFilesQuery = {
     text: "DELETE FROM file where id IN ($1, $2, $3)",
