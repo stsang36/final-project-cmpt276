@@ -38,7 +38,7 @@ const LoginForm = () => {
         return
       }
       if(role === 'client'){
-        navigate('/')
+        navigate('/create')
         return
       }
       navigate('/')
