@@ -1,5 +1,4 @@
 const dotenv = require('dotenv')
-const path = require('path')
 dotenv.config({path: '../.env'})
 const { pool } = require('../config/pool.js')
 
@@ -24,9 +23,25 @@ const {
     fileCheckCleanUp
 } = require('./tests/fileTest')
 
-// keeps track of the created admin account
+const { 
+    getAvailableJobscheck,
+    getAllActiveJobscheck,
+    getAllinActiveJobscheck,
+    getMyJobscheck,
+    getCurrentJobscheck,
+    getPastJobscheck,
+    addJobCheck,
+    claimJobcheck,
+    deleteJobCheck,
+    dropJobCheck,
+    updateJobCheck
+} = require('./tests/jobTest')
+
+// keeps track of the created admin and transcriber account
 let adminCreated = false
 let adminID = null
+let transcriberCreated = false
+let transcriberID = null
 
 // please make sure that .env file is set to development and has the following variables:
 console.log(`Environment Type: ${process.env.NODE_ENV}`)
@@ -39,39 +54,63 @@ console.log(`SendGrid API KEY (DO NOT SHARE): ${process.env.SENDGRID_API_KEY}`)
 
 console.log("\n!! Please make sure SSL mode is turned off for this test to work locally! !!\n!! All data tables must be present for the tests to pass! !!\n")
 
-before( (done) => {
+before( () => {
 
     if (process.env.NODE_ENV !== 'development') {
         throw new Error('This test suite should only be run in development mode')
     }
 
-    // Create admin account if it doesn't exist
-    const checkAdminQuery = `SELECT * FROM \"user\" WHERE username = 'admin'`
-    pool.query(checkAdminQuery).then((checkAdmin) => {
-        if (checkAdmin.rowCount === 0) {
-            const adminInsertQuery = {
-                text: 'INSERT into \"user\" (username, password, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-                values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S', 'admin', false, false]
+    it('Create admin account if it doesn\'t exist', (done) => {
+        const checkAdminQuery = `SELECT * FROM \"user\" WHERE username = 'admin'`
+        pool.query(checkAdminQuery).then((checkAdmin) => {
+            if (checkAdmin.rowCount === 0) {
+                const adminInsertQuery = {
+                    text: 'INSERT into \"user\" (username, password, email, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+                    values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S','admin@poggers.com', 'admin', false, true]
+                }
+                pool.query(adminInsertQuery)
+                    .then( (result) => {
+                        adminID = result.rows[0].id
+                        adminCreated = true
+                        done()
+                    })
+                    .catch( (err) => {
+                        throw new Error(err)
+                    })
+            } else {
+                done()
             }
-            pool.query(adminInsertQuery)
-                .then( (result) => {
-                    adminID = result.rows[0].id
-                    adminCreated = true
 
-                    done()
-                })
-                .catch( (err) => {
-                    throw new Error(err)
-                })
-
-        } else {
-            done()
-        }
-
-    }).catch( (err) => {
-        throw new Error(err)
+        }).catch( (err) => {
+            throw new Error(err)
+        })
     })
-    
+
+    it('Create transcriber account if it doesn\'t exist', (done) => {
+        const checkTranscriberQuery = `SELECT * FROM \"user\" WHERE username = 'transcriber'`
+        pool.query(checkTranscriberQuery).then((checkTranscriber) => {
+            if (checkTranscriber.rowCount === 0) {
+                const transcriberInsertQuery = {
+                    text: 'INSERT into \"user\" (username, password, email, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+                    values: ['transcriber', '$2a$10$vD/cn.a1hxPEr75PemL/FOHLDEqUfdD3scq5dEZZ4zl5qY0fUP7vi','transcriber@poggers.com', 'transcriber', false, true]
+                }
+                pool.query(transcriberInsertQuery).then( (result) => {
+                        transcriberID = result.rows[0].id
+                        transcriberCreated = true
+                        done()
+                    })
+                    .catch( (err) => {
+                        throw new Error(err)
+                    })
+
+            } else {
+                done()
+            }
+        }).catch( (err) => {
+            throw new Error(err)
+        })
+    })
+
 })
 
 describe('Login System:', () => {
@@ -96,23 +135,39 @@ describe('File System:', () => {
     
 });
 
-after( (done) => {
+describe('Job system:', () => {
+    it('should get all available jobs by roles from /api/job', getAvailableJobscheck)
+    it('should get all active jobs for the admin from /api/job/admin/active', getAllActiveJobscheck)
+    it('should get all active jobs for the admin from /api/job/admin/inactive', getAllinActiveJobscheck)
+    it('should get all jobs created by the user from /api/job/my', getMyJobscheck)
+    it('should get all ongoing jobs created by the user from /api/job/current', getCurrentJobscheck)
+    it('should get all ongoing jobs created by the user from /api/job/past', getPastJobscheck)
+    it('should add a new job and its corresponding files from /api/job', addJobCheck)
+    it('should claim a job on PUT /api/job/claim/:id', claimJobcheck)
+    it('should update a job on PUT /api/job/update/:id', updateJobCheck)
+    it('should drop a job on PUT /api/job/drop/:id', dropJobCheck)
+    it('should delete a job on DELETE /api/job/admin/delete/:id', deleteJobCheck);
+});
+
+after( async () => {
+
     loginCheckCleanUp()
     fileCheckCleanUp()
 
-    // Delete admin account if created by this test suite
     if (adminCreated) {
         const adminDeleteQuery = {
             text: 'DELETE FROM \"user\" WHERE id = $1',
             values: [adminID]
         }
-        pool.query(adminDeleteQuery).then((result)=> { 
-            done() 
-        })
-            .catch( (err) => {
-                throw new Error(err)
-            })
-    } else {
-        done()
+        await pool.query(adminDeleteQuery)
     }
+
+    if (transcriberCreated) {
+        const transcriberDeleteQuery = {
+            text: 'DELETE FROM \"user\" WHERE id = $1',
+            values: [transcriberID]
+        }
+        await pool.query(transcriberDeleteQuery)
+    }
+    
 })

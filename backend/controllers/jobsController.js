@@ -104,12 +104,11 @@ const getPastJobs = async(req, res) => {
   res.status(200).json(result.rows)
 }
 
-//  @route    DELETE /api/job/delete/:id
+//  @route    DELETE /api/job/admin/delete/:id
 //  @desc     Deletes a job and its corresponding files from the database
 //  @access   PRIVATE (ADMIN)
 const deletejob = async (req,res) => { 
   if(req.user.role !== 'admin'){
-    console.log('i am not admin')
     res.status(401)
     throw new Error('unauthorized access')
   }
@@ -123,18 +122,18 @@ const deletejob = async (req,res) => {
     res.status(400)
     throw new Error('job not found')
   }
+  const deleteJobQuery = {
+    text : "DELETE FROM job WHERE id = $1",
+    values: [jobId]
+  }
+  await pool.query(deleteJobQuery)
   const { transcribe_fileid, review_fileid, complete_fileid } = selectJobResult.rows[0]
   const deleteFilesQuery = {
     text: "DELETE FROM file where id IN ($1, $2, $3)",
     values: [transcribe_fileid, review_fileid, complete_fileid]
   }
   await pool.query(deleteFilesQuery)
-  const deleteJobQuery = {
-    text : "DELETE FROM job WHERE id = $1",
-    values: [jobId]
-  }
-  await pool.query(deleteJobQuery)
-  res.status(200).json({message:"Delete request called"})
+  res.status(200).json({message:`job ${jobId} deleted`})
 }
 
 // 
@@ -161,11 +160,16 @@ const addJob = async(req, res) => {
   }
   const fileId = fileUploadResults.rows[0].id
   const addNewJobQuery = {
-    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline) VALUES ($1, $2, $3)',
+    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline) VALUES ($1, $2, $3) RETURNING id',
     values: [fileId, id, deadline]
   }
-  await pool.query(addNewJobQuery)
-  res.status(200).json({message: 'job has been posted'})
+  const jobQueryResults = await pool.query(addNewJobQuery)
+  const jobId = jobQueryResults.rows[0].id
+  res.status(200).json({
+    message: 'job has been posted', 
+    jobId: jobId,
+    fileId: fileId
+  })
 }
 
 // 
@@ -251,7 +255,7 @@ const claimJob = async(req, res) => {
     throw new Error('job not found')
   }
 
-  var claimableStatus = 'review'
+  let  claimableStatus = 'review'
   if(role === 'transcriber'){
     claimableStatus = 'transcribe'
   }
