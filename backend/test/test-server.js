@@ -65,8 +65,8 @@ before( () => {
         pool.query(checkAdminQuery).then((checkAdmin) => {
             if (checkAdmin.rowCount === 0) {
                 const adminInsertQuery = {
-                    text: 'INSERT into \"user\" (username, password, email, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-                    values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S','admin@poggers.com', 'admin', false, true]
+                    text: 'INSERT into \"user\" (username, password,  email, discordid, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+                    values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S','admin@poggers.com', '146787205606539264', 'admin', true, true]
                 }
                 pool.query(adminInsertQuery)
                     .then( (result) => {
@@ -144,8 +144,9 @@ describe('Job system:', () => {
     it('should get all ongoing jobs created by the user from /api/job/past', getPastJobscheck)
     it('should add a new job and its corresponding files from /api/job', addJobCheck)
     it('should claim a job on PUT /api/job/claim/:id', claimJobcheck)
-    it('should update a job on PUT /api/job/update/:id', updateJobCheck)
     it('should drop a job on PUT /api/job/drop/:id', dropJobCheck)
+    it('should claim a job again on PUT /api/job/claim/:id', claimJobcheck)
+    it('should update a job on PUT /api/job/update/:id', updateJobCheck)
     it('should delete a job on DELETE /api/job/admin/delete/:id', deleteJobCheck);
 });
 
