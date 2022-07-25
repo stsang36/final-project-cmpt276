@@ -217,6 +217,16 @@ const claimJobcheck = (done) => {
 
 const updateJobCheck = (done) => {
     getTranscriberToken().then( (transcriberToken) => {
+        const fileName = 'sample.pdf'
+        const fileType = 'application/pdf'
+        const filePath = path.resolve(__dirname, `../testFiles/${fileName}`)
+        const file = fs.readFileSync(filePath, 'base64')
+
+        fileobj ={
+            'media': file,
+            'name': fileName,
+            'type': fileType
+        }
 
         if (!id) {
             throw new Error('ID not found')
@@ -228,6 +238,7 @@ const updateJobCheck = (done) => {
     
         chai.request(server)
             .put(`/api/job/update/${id}`)
+            .send(fileobj)
             .set('Authorization',`Bearer ${transcriberToken}`)
             .end((error,res)=>{
                 if (error) {

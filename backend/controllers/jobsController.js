@@ -1,4 +1,7 @@
 const { pool } = require('../config/pool.js')
+const  discordBot = require('../config/discordBot.js')
+const { EmbedBuilder } = require('@discordjs/builders')
+
 require('express-async-errors')
 
 //
@@ -114,7 +117,7 @@ const deletejob = async (req,res) => {
   }
   const { id: jobId  } = req.params
   const selectJobQuery = {
-    text: 'SELECT transcribe_fileid, review_fileid, complete_fileid FROM job WHERE id = $1 limit 1',
+    text: 'SELECT transcribe_fileid, review_fileid, complete_fileid, owner_id FROM job WHERE id = $1 limit 1',
     values: [jobId] 
   }
   const selectJobResult = await pool.query(selectJobQuery)
@@ -127,12 +130,51 @@ const deletejob = async (req,res) => {
     values: [jobId]
   }
   await pool.query(deleteJobQuery)
-  const { transcribe_fileid, review_fileid, complete_fileid } = selectJobResult.rows[0]
+  const { transcribe_fileid, review_fileid, complete_fileid, owner_id } = selectJobResult.rows[0]
   const deleteFilesQuery = {
     text: "DELETE FROM file where id IN ($1, $2, $3)",
     values: [transcribe_fileid, review_fileid, complete_fileid]
   }
   await pool.query(deleteFilesQuery)
+
+
+  // discord notification
+  const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+  const discordNotify = owner.rows[0].togglediscordpm
+  
+  if (discordNotify && discordBot.user) {
+    const discordId = owner.rows[0].discordid
+    const user = await discordBot.users.fetch(discordId)
+    if (user) {
+      const embedMessage = new EmbedBuilder()
+      embedMessage.setTitle(`Your job has been deleted by "${req.user.username}".`)
+      embedMessage.setDescription(`Your job with ID: ${jobId} has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`)
+      embedMessage.setColor(0xDC143C)
+      embedMessage.setTimestamp()
+      embedMessage.setFooter({text: 'Bytetools Job Notification'})
+      await user.send({embeds: [embedMessage]})
+    } else {
+      console.log('User not found on server, ignoring sending a private message...')
+    }
+
+    if (process.env.DISCORD_CHANNEL_ID) {
+      const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID)
+      if (channel) {
+        const embedMessage = new EmbedBuilder()
+        embedMessage.setTitle('Job Deleted.')
+        embedMessage.setDescription(`A job has been deleted. \n Job ID: ${jobId}`)
+        embedMessage.setColor(0xDC143C)
+        embedMessage.setTimestamp()
+        embedMessage.setFooter({text: 'Bytetools Job Notification'})
+        await channel.send({embeds: [embedMessage]})
+      } else {
+        console.log('Channel not found, ignoring sending a server message...')
+      }
+    }
+
+  }
+
+
   res.status(200).json({message:`job ${jobId} deleted`})
 }
 
@@ -146,7 +188,7 @@ const addJob = async(req, res) => {
     res.status(400)
     throw new Error('missing data')
   }
-  const {id} = req.user
+  const {id, username} = req.user
   const {file, deadline} = req.body
   const buf = Buffer.from(file.media, 'base64')
   const uploadFileQuery = {
@@ -165,10 +207,33 @@ const addJob = async(req, res) => {
   }
   const jobQueryResults = await pool.query(addNewJobQuery)
   const jobId = jobQueryResults.rows[0].id
+
+  //discord notification
+  
+  let discordStatus = 'not sent'
+
+  if (process.env.DISCORD_CHANNEL_ID && discordBot.user) {
+    const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID)
+    if (channel) {
+      const embedMessage = new EmbedBuilder()
+      embedMessage.setTitle('New Job!')
+      embedMessage.setDescription(`A new job has been posted by "${username}"\n Job ID: ${jobId}`)
+      embedMessage.setColor(0x0099FF)
+      embedMessage.setTimestamp()
+      embedMessage.setFooter({text: 'Bytetools Job Notification'})
+      await channel.send({embeds: [embedMessage]})
+      discordStatus = 'sent'
+    } else {
+      console.log('Channel not found, ignoring sending a server message...')
+    }
+  }
+
+
   res.status(200).json({
     message: 'job has been posted', 
     jobId: jobId,
-    fileId: fileId
+    fileId: fileId,
+    discordStatus: discordStatus
   })
 }
 
@@ -187,7 +252,7 @@ const updateJob = async(req, res) => {
     res.status(400)
     throw new Error('missing parameter')
   }
-  const { role, id } = req.user
+  const { role, id} = req.user
   if(role === 'client' || role === 'admin'){
     res.status(401)
     throw new Error('unauthorized access')
@@ -197,8 +262,8 @@ const updateJob = async(req, res) => {
   var newActive = true
   var newStatus = ''
   const file = req.body
-  const findJobResults = await pool.query('SELECT active, status, claimed_userid FROM job WHERE id = $1 limit 1', [jobId])
-  const { status, claimed_userid, active } = findJobResults.rows[0]
+  const findJobResults = await pool.query('SELECT active, status, claimed_userid, owner_id FROM job WHERE id = $1 limit 1', [jobId])
+  const { status, claimed_userid, active, owner_id } = findJobResults.rows[0]
   if(!active || claimed_userid !== id){
     res.status(401)
     throw new Error('unauthorized access')
@@ -232,6 +297,29 @@ const updateJob = async(req, res) => {
     values: [newFileId, id, newStatus, newActive, jobId]
   }
   await pool.query(updateJobQuery)
+
+  //discord notification
+
+  const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+  const discordNotify = owner.rows[0].togglediscordpm
+
+  if (discordNotify && discordBot.user) {
+    const discordId = owner.rows[0].discordid
+    const user = await discordBot.users.fetch(discordId)
+    if (user) {
+      const embedMessage = new EmbedBuilder()
+      embedMessage.setTitle('Your job status has been updated!')
+      embedMessage.setDescription(`Your job with ID: ${jobId} "${file.name}" has been updated from "${status}" to "${newStatus}"!`)
+      embedMessage.setColor(0x0099FF)
+      embedMessage.setTimestamp()
+      embedMessage.setFooter({text: 'Bytetools Job Notification'})
+      await user.send({embeds: [embedMessage]})
+    } else {
+      console.log('User not found on server, ignoring sending a server message...')
+    }
+
+  }
+
   res.status(200).json({message: 'success'})
 }
 
@@ -289,7 +377,7 @@ const dropJob = async(req, res) => {
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const findJobObj = await pool.query('SELECT claimed_userid FROM job WHERE id = $1 limit 1', [jobId])
+  const findJobObj = await pool.query('SELECT claimed_userid, owner_id FROM job WHERE id = $1 limit 1', [jobId])
   const job = findJobObj.rows[0]
   if(!job){
     res.status(400)
@@ -301,6 +389,45 @@ const dropJob = async(req, res) => {
       values: [null, jobId]
     }
     await pool.query(claimJobQuery)
+
+    // discord notification
+    const owner_id = job.owner_id
+    const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+    const discordNotify = owner.rows[0].togglediscordpm
+    const ownerUsername = owner.rows[0].username
+    
+    if (discordNotify && discordBot.user) {
+      const discordId = owner.rows[0].discordid
+      const user = await discordBot.users.fetch(discordId)
+      if (user) {
+        const embedMessage = new EmbedBuilder()
+        embedMessage.setTitle('Your job has been dropped.')
+        embedMessage.setDescription(`Your job with ID: ${jobId} has been dropped by a transcriber. \nAnother transcriber can claim it.`)
+        embedMessage.setColor(0xDC143C)
+        embedMessage.setTimestamp()
+        embedMessage.setFooter({text: 'Bytetools Job Notification'})
+        await user.send({embeds: [embedMessage]})
+      } else {
+        console.log('User not found on server, ignoring sending a private message...')
+      }
+
+      if (process.env.DISCORD_CHANNEL_ID) {
+        const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID)
+        if (channel) {
+          const embedMessage = new EmbedBuilder()
+          embedMessage.setTitle('Available Job!')
+          embedMessage.setDescription(`A job from "${ownerUsername}" is available to be claimed! \n Job ID: ${jobId}`)
+          embedMessage.setColor(0x0099FF)
+          embedMessage.setTimestamp()
+          embedMessage.setFooter({text: 'Bytetools Job Notification'})
+          await channel.send({embeds: [embedMessage]})
+        } else {
+          console.log('Channel not found, ignoring sending a server message...')
+        }
+      }
+  
+    }
+  
     res.status(200).json({message: 'job has been successfully dropped'})
   }else{
     res.status(401)
