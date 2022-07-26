@@ -38,14 +38,23 @@ limits: 50 requests per second per bot
 
 ## PATH VARIABLES
 NODE_ENV = development
+
 PORT = 5000
+
 DATABASE_URL = 
+
 SENDGRID_API_KEY = SG.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 JWT_SECRET = 
+
 FRONTEND_URL = http://localhost:3000
+
 NOREPLY_EMAIL = 
+
 DISCORD_TOKEN = 
+
 DISCORD_CHANNEL_ID = 
+
 
 
 # scripts to get started (development purposes only)
