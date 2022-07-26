@@ -10,7 +10,6 @@ const client = new discord.Client({
 })
 
 
-
 client.on('ready', async () => {
     console.log(`Discord: Logged in as ${client.user.tag}!`)
 
@@ -19,21 +18,17 @@ client.on('ready', async () => {
         const result = await pool.query('SELECT * FROM \"job\" WHERE status = $1', ['transcribe'])
         const openJobs = result.rows.length
         client.user.presence.set({
-            status: 'online',
-            activities: [{
-                name: `${openJobs} jobs available`,
-                type: 'PLAYING'
-            }]
+            activities: [{name: `${openJobs} Jobs Available`}],
+            status: 'online'
         });
-
     } 
-
 
     await updatePresence()
 
     setInterval( async () => {
         await updatePresence()
-    } , 50000)
+
+    } , 1000 * 60 * 5) // every 5 minutes
 
 })
 
