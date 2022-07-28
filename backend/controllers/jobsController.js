@@ -146,8 +146,12 @@ const deletejob = async (req,res) => {
 
     const deleteJobMessagePM = {
       title: `Your job has been deleted by "${req.user.username}".`,
-      description: `Your job with ID: ${jobId} has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
-      color: 0xDC143C
+      description: `Your job has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
+      color: 0xDC143C,
+      fields: [{
+          name: "Job ID",
+          value: jobId
+        }]
     }
     await sendToPM(discordId, deleteJobMessagePM)
   }
@@ -194,7 +198,7 @@ const addJob = async(req, res) => {
   }
   const fileId = fileUploadResults.rows[0].id
   const addNewJobQuery = {
-    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline) VALUES ($1, $2, $3) RETURNING id',
+    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline) VALUES ($1, $2, $3) RETURNING id, deadline',
     values: [fileId, id, deadline]
   }
   const jobQueryResults = await pool.query(addNewJobQuery)
@@ -203,12 +207,18 @@ const addJob = async(req, res) => {
   //discord notification
 
   const newJobMessage = {
-    title: `New job!`,
-    description: `A new job has been posted by "${username}"!\nPlease visit the website to claim it.`,
+    title: `New Job for Transcribing!`,
+    description: `A new job for transcribing has been posted!\nPlease visit the website to claim it.`,
     color: 0x0099FF,
     fields: [{
       name: 'Job ID:',
-      value: `${jobId}`,
+      value: `${jobId}`
+    },{
+      name: 'Creator:',
+      value: `${username}`
+    },{
+      name: 'Deadline:',
+      value: `${jobQueryResults.rows[0].deadline}`
     }]
   }
 
@@ -250,8 +260,8 @@ const updateJob = async(req, res) => {
   var newActive = true
   var newStatus = ''
   const file = req.body
-  const findJobResults = await pool.query('SELECT active, status, claimed_userid, owner_id FROM job WHERE id = $1 limit 1', [jobId])
-  const { status, claimed_userid, active, owner_id } = findJobResults.rows[0]
+  const findJobResults = await pool.query('SELECT deadline, active, status, claimed_userid, owner_id FROM job WHERE id = $1 limit 1', [jobId])
+  const { status, claimed_userid, active, owner_id, deadline } = findJobResults.rows[0]
   if(!active || claimed_userid !== id){
     res.status(401)
     throw new Error('unauthorized access')
@@ -294,11 +304,11 @@ const updateJob = async(req, res) => {
   if (discordNotify) {
     const discordId = owner.rows[0].discordid
 
-    if(status === 'complete') {
+    if(newStatus === 'complete') {
 
       const completeJobMessagePM = {
         title: `Your job has been completed by "${req.user.username}".`,
-        description: `Your job with ID: ${jobId} "${file.name}" has been completed.\nPlease contact the reviewer if you have any questions.`,
+        description: `Your job with ID: ${jobId} "${file.name}" has been completed.\nYou can download the file from the website.`,
         color: 0x57F287
       }
 
@@ -312,8 +322,18 @@ const updateJob = async(req, res) => {
 
       const updateJobMessage = {
         title: `Job updated.`,
-        description: `Your job with ID: ${jobId} "${file.name}" has been updated from "${status}" to "${newStatus}"!`,
-        color: 0x0099FF
+        description: `Your job with filename, "${file.name}" has been updated from "${status}" to "${newStatus}"!`,
+        color: 0x0099FF,
+        fields: [{
+          name: 'Job ID:',
+          value: `${jobId}`
+        }, {
+          name: `Worker:`,
+          value: `${req.user.username}`
+        }, {
+          name: 'Status:',
+          value: `${newStatus}`
+        }]
       }
 
       try {
@@ -321,7 +341,38 @@ const updateJob = async(req, res) => {
       } catch (err) {
         console.log(err)
       }
+
     }
+  }
+
+  if (newStatus === 'review') {
+    const reviewStatusMessage = {
+      title: `New Job for Reviewing!`,
+      description: `A job needs to be reviewed.\nPlease visit the website to review it.`,
+      color: 0x0099FF,
+      fields: [{
+        name: 'Job ID:',
+        value: `${jobId}`
+      }, {
+        name: 'Creator:',
+        value: `${owner.rows[0].username}`,
+        inline: true
+      }, {
+        name: 'Transcriber:',
+        value: `${req.user.username}`,
+        inline: true
+      }, {
+        name: 'Deadline:',
+        value: `${deadline}`
+      }]
+    }
+
+    try {
+      await sendToChannel(reviewStatusMessage)
+    } catch (err) {
+      console.log(err)
+    }
+
   }
 
   res.status(200).json({message: 'success'})
@@ -371,9 +422,19 @@ const claimJob = async(req, res) => {
     if (discordNotify) {
       const discordId = owner.rows[0].discordid
       const claimJobMessagePM = {
-        title: `${req.user.username} has claimed your job.`,
-        description: `Your job with ID: ${jobId} has been claimed by ${req.user.username}.\nPlease contact the owner if you have any questions.`,
-        color: 0x0099FF
+        title: `${req.user.username} has Claimed your Job.`,
+        description: `Your job has been claimed by ${req.user.username}.\nPlease contact the ${req.user.username} if you have any questions.`,
+        color: 0x0099FF,
+        fields: [{
+          name: 'Job ID:',
+          value: `${jobId}`
+        }, {
+          name: 'Claimed by:',
+          value: `${req.user.username}`
+        }, {
+          name: 'Status:',
+          value: `${job.status}`
+        }]
       }
       try {
         await sendToPM(discordId, claimJobMessagePM)
@@ -400,7 +461,7 @@ const dropJob = async(req, res) => {
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const findJobObj = await pool.query('SELECT claimed_userid, owner_id FROM job WHERE id = $1 limit 1', [jobId])
+  const findJobObj = await pool.query('SELECT claimed_userid, owner_id, deadline, status FROM job WHERE id = $1 limit 1', [jobId])
   const job = findJobObj.rows[0]
   if(!job){
     res.status(400)
@@ -422,9 +483,16 @@ const dropJob = async(req, res) => {
     if (discordNotify) {
       const discordId = owner.rows[0].discordid
       const dropJobMessagePM = { 
-        title: `Your job has been dropped.`,
-        description: `Your job with ID: ${jobId} has been dropped by a transcriber. \nAnother transcriber can claim it.`,
-        color: 0xDC143C
+        title: `Your Job has been Dropped.`,
+        description: `Your job has been dropped. \nAnother person can claim it.`,
+        color: 0xDC143C,
+        fields: [{
+          name: 'Job ID:',
+          value: `${jobId}`
+        }, {
+          name: 'Dropped by:',
+          value: `${req.user.username}`
+        }]
       }
 
       try {
@@ -440,7 +508,18 @@ const dropJob = async(req, res) => {
       color: 0x0099FF,
       fields: [{
         name: 'Job ID:',
-        value: `${jobId}`,
+        value: `${jobId}`
+      }, {
+        name: 'Creator:',
+        value: `${ownerUsername}`,
+        inline: true
+      }, {
+        name: 'Status:',
+        value: `Need to ${job.status}`,
+        inline: true
+      }, {
+        name: 'Deadline:',
+        value: `${job.deadline}`
       }]
     }
 

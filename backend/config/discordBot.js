@@ -95,7 +95,7 @@ client.on('ready', async () => {
 
     const updatePresence = async() => {
 
-        const result = await pool.query('SELECT * FROM \"job\" WHERE status = $1', ['transcribe'])
+        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true)', ['transcribe', 'review'])
         const openJobs = result.rows.length
         client.user.presence.set({
             activities: [{name: `${openJobs} Jobs Available`}],
