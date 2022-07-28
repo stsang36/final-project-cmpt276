@@ -1,6 +1,5 @@
 const { pool } = require('../config/pool.js')
-const  discordBot = require('../config/discordBot.js')
-const { EmbedBuilder } = require('@discordjs/builders')
+const {sendToChannel, sendToPM } = require('../config/discordBot.js')
 
 require('express-async-errors')
 
@@ -142,37 +141,30 @@ const deletejob = async (req,res) => {
   const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
   const discordNotify = owner.rows[0].togglediscordpm
   
-  if (discordNotify && discordBot.user) {
+  if (discordNotify) {
     const discordId = owner.rows[0].discordid
-    const user = await discordBot.users.fetch(discordId)
-    if (user) {
-      const embedMessage = new EmbedBuilder()
-      embedMessage.setTitle(`Your job has been deleted by "${req.user.username}".`)
-      embedMessage.setDescription(`Your job with ID: ${jobId} has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`)
-      embedMessage.setColor(0xDC143C)
-      embedMessage.setTimestamp()
-      embedMessage.setFooter({text: 'Bytetools Job Notification'})
-      await user.send({embeds: [embedMessage]})
-    } else {
-      console.log('User not found on server, ignoring sending a private message...')
-    }
 
-    if (process.env.DISCORD_CHANNEL_ID) {
-      const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID)
-      if (channel) {
-        const embedMessage = new EmbedBuilder()
-        embedMessage.setTitle('Job Deleted.')
-        embedMessage.setDescription(`A job has been deleted. \n Job ID: ${jobId}`)
-        embedMessage.setColor(0xDC143C)
-        embedMessage.setTimestamp()
-        embedMessage.setFooter({text: 'Bytetools Job Notification'})
-        await channel.send({embeds: [embedMessage]})
-      } else {
-        console.log('Channel not found, ignoring sending a server message...')
-      }
+    const deleteJobMessagePM = {
+      title: `Your job has been deleted by "${req.user.username}".`,
+      description: `Your job with ID: ${jobId} has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
+      color: 0xDC143C
     }
-
+    await sendToPM(discordId, deleteJobMessagePM)
   }
+
+  const deleteJobMesssageChannel = {
+      title: 'Job Deleted.',
+      description: `A job has been deleted.`,
+      color: 0xDC143C,
+      fields: [{
+        name: 'Job ID:',
+        value: `${jobId}`,
+      }]
+    }
+
+  await sendToChannel(deleteJobMesssageChannel)
+
+  
 
 
   res.status(200).json({message:`job ${jobId} deleted`})
@@ -209,31 +201,27 @@ const addJob = async(req, res) => {
   const jobId = jobQueryResults.rows[0].id
 
   //discord notification
-  
-  let discordStatus = 'not sent'
 
-  if (process.env.DISCORD_CHANNEL_ID && discordBot.user) {
-    const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID)
-    if (channel) {
-      const embedMessage = new EmbedBuilder()
-      embedMessage.setTitle('New Job!')
-      embedMessage.setDescription(`A new job has been posted by "${username}"\n Job ID: ${jobId}`)
-      embedMessage.setColor(0x0099FF)
-      embedMessage.setTimestamp()
-      embedMessage.setFooter({text: 'Bytetools Job Notification'})
-      await channel.send({embeds: [embedMessage]})
-      discordStatus = 'sent'
-    } else {
-      console.log('Channel not found, ignoring sending a server message...')
-    }
+  const newJobMessage = {
+    title: `New job!`,
+    description: `A new job has been posted by "${username}"!\nPlease visit the website to claim it.`,
+    color: 0x0099FF,
+    fields: [{
+      name: 'Job ID:',
+      value: `${jobId}`,
+    }]
   }
 
+  try {
+    await sendToChannel(newJobMessage)
+  } catch (err) {
+    console.log(err)
+  }
 
   res.status(200).json({
     message: 'job has been posted', 
     jobId: jobId,
     fileId: fileId,
-    discordStatus: discordStatus
   })
 }
 
@@ -303,21 +291,37 @@ const updateJob = async(req, res) => {
   const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
   const discordNotify = owner.rows[0].togglediscordpm
 
-  if (discordNotify && discordBot.user) {
+  if (discordNotify) {
     const discordId = owner.rows[0].discordid
-    const user = await discordBot.users.fetch(discordId)
-    if (user) {
-      const embedMessage = new EmbedBuilder()
-      embedMessage.setTitle('Your job status has been updated!')
-      embedMessage.setDescription(`Your job with ID: ${jobId} "${file.name}" has been updated from "${status}" to "${newStatus}"!`)
-      embedMessage.setColor(0x0099FF)
-      embedMessage.setTimestamp()
-      embedMessage.setFooter({text: 'Bytetools Job Notification'})
-      await user.send({embeds: [embedMessage]})
-    } else {
-      console.log('User not found on server, ignoring sending a server message...')
-    }
 
+    if(status === 'complete') {
+
+      const completeJobMessagePM = {
+        title: `Your job has been completed by "${req.user.username}".`,
+        description: `Your job with ID: ${jobId} "${file.name}" has been completed.\nPlease contact the reviewer if you have any questions.`,
+        color: 0x57F287
+      }
+
+      try {
+        await sendToPM(discordId, completeJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+
+    } else {
+
+      const updateJobMessage = {
+        title: `Job updated.`,
+        description: `Your job with ID: ${jobId} "${file.name}" has been updated from "${status}" to "${newStatus}"!`,
+        color: 0x0099FF
+      }
+
+      try {
+        await sendToPM(discordId, updateJobMessage)
+      } catch (err) {
+        console.log(err)
+      }
+    }
   }
 
   res.status(200).json({message: 'success'})
@@ -336,7 +340,7 @@ const claimJob = async(req, res) => {
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const findJobObj = await pool.query('SELECT claimed_userid, status, active FROM job WHERE id = $1 limit 1', [jobId])
+  const findJobObj = await pool.query('SELECT claimed_userid, owner_id, status, active FROM job WHERE id = $1 limit 1', [jobId])
   const job = findJobObj.rows[0]
   if(!job){
     res.status(400)
@@ -358,6 +362,25 @@ const claimJob = async(req, res) => {
       values: [id, jobId]
     }
     await pool.query(claimJobQuery)
+
+    //discord notification
+    const owner_id = job.owner_id
+    const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+    const discordNotify = owner.rows[0].togglediscordpm
+
+    if (discordNotify) {
+      const discordId = owner.rows[0].discordid
+      const claimJobMessagePM = {
+        title: `${req.user.username} has claimed your job.`,
+        description: `Your job with ID: ${jobId} has been claimed by ${req.user.username}.\nPlease contact the owner if you have any questions.`,
+        color: 0x0099FF
+      }
+      try {
+        await sendToPM(discordId, claimJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+    }
     res.status(200).json({message: 'job has been claimed successfully'})
   }else{
     res.status(400)
@@ -396,37 +419,39 @@ const dropJob = async(req, res) => {
     const discordNotify = owner.rows[0].togglediscordpm
     const ownerUsername = owner.rows[0].username
     
-    if (discordNotify && discordBot.user) {
+    if (discordNotify) {
       const discordId = owner.rows[0].discordid
-      const user = await discordBot.users.fetch(discordId)
-      if (user) {
-        const embedMessage = new EmbedBuilder()
-        embedMessage.setTitle('Your job has been dropped.')
-        embedMessage.setDescription(`Your job with ID: ${jobId} has been dropped by a transcriber. \nAnother transcriber can claim it.`)
-        embedMessage.setColor(0xDC143C)
-        embedMessage.setTimestamp()
-        embedMessage.setFooter({text: 'Bytetools Job Notification'})
-        await user.send({embeds: [embedMessage]})
-      } else {
-        console.log('User not found on server, ignoring sending a private message...')
+      const dropJobMessagePM = { 
+        title: `Your job has been dropped.`,
+        description: `Your job with ID: ${jobId} has been dropped by a transcriber. \nAnother transcriber can claim it.`,
+        color: 0xDC143C
       }
 
-      if (process.env.DISCORD_CHANNEL_ID) {
-        const channel = await discordBot.channels.fetch(process.env.DISCORD_CHANNEL_ID)
-        if (channel) {
-          const embedMessage = new EmbedBuilder()
-          embedMessage.setTitle('Available Job!')
-          embedMessage.setDescription(`A job from "${ownerUsername}" is available to be claimed! \n Job ID: ${jobId}`)
-          embedMessage.setColor(0x0099FF)
-          embedMessage.setTimestamp()
-          embedMessage.setFooter({text: 'Bytetools Job Notification'})
-          await channel.send({embeds: [embedMessage]})
-        } else {
-          console.log('Channel not found, ignoring sending a server message...')
-        }
+      try {
+        await sendToPM(discordId, dropJobMessagePM)
+      } catch (err) {
+        console.log(err)
       }
-  
     }
+    
+    const dropJobMessageChannel = {
+      title: `Available Job!`,
+      description: `A job from "${ownerUsername}" is available to be claimed!\nPlease visit the website to claim it.`,
+      color: 0x0099FF,
+      fields: [{
+        name: 'Job ID:',
+        value: `${jobId}`,
+      }]
+    }
+
+    try {
+      await sendToChannel(dropJobMessageChannel)
+    } catch (err) {
+      console.log(err)
+    }
+      
+  
+    
   
     res.status(200).json({message: 'job has been successfully dropped'})
   }else{
