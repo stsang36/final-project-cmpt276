@@ -95,7 +95,7 @@ client.on('ready', async () => {
 
     const updatePresence = async() => {
 
-        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid = null) ', ['transcribe', 'review'])
+        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL) ', ['transcribe', 'review'])
         // count nulls for transcribe and reviewer ids
         const openJobs = result.rows.length
 
@@ -113,7 +113,7 @@ client.on('ready', async () => {
             
             if (channel) {
             
-                const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid = null)', ['transcribe', 'review'])
+                const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL)', ['transcribe', 'review'])
                 
                 const transcriberJobs = result.rows.filter(row => row.status === 'transcribe').length
                 const reviewerJobs = result.rows.filter(row => row.status === 'review').length
