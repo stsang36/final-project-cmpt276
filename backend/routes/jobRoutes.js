@@ -13,9 +13,12 @@ const {
   getAvailableJobs,
   getAllActiveJobs,
   getAllInactiveJobs,
+  getJob,
 } = require('../controllers/jobsController')
 
 router.route("/").get(protect, getAvailableJobs).post(protect, addJob)
+
+router.route("/one/:id").get(protect, getJob)
 
 router.route("/update/:id").put(protect, updateJob)
 

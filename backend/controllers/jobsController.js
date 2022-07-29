@@ -147,7 +147,7 @@ const addJob = async(req, res) => {
     throw new Error('missing data')
   }
   const {id} = req.user
-  const {file, deadline} = req.body
+  const {name, file, deadline} = req.body
   const buf = Buffer.from(file.media, 'base64')
   const uploadFileQuery = {
     text: 'INSERT INTO file(name, type, media) VALUES ($1, $2, $3) RETURNING id',
@@ -160,8 +160,8 @@ const addJob = async(req, res) => {
   }
   const fileId = fileUploadResults.rows[0].id
   const addNewJobQuery = {
-    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline) VALUES ($1, $2, $3) RETURNING id',
-    values: [fileId, id, deadline]
+    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline, name) VALUES ($1, $2, $3, $4) RETURNING id',
+    values: [fileId, id, deadline, name]
   }
   const jobQueryResults = await pool.query(addNewJobQuery)
   const jobId = jobQueryResults.rows[0].id
@@ -308,6 +308,81 @@ const dropJob = async(req, res) => {
   }
 }
 
+//  @route    GET /api/job/one/:id
+//  @params   id: id of job obj
+//  @desc     drops claimed job of user
+//  @access   PRIVATE
+const getJob = async(req, res) => {
+  const { id: jobId } = req.params
+  const { id, role } = req.user
+  const getJobQuery = {
+    text: 'SELECT * FROM job WHERE id = $1 limit 1',
+    values: [jobId]
+  }
+  const results = await pool.query(getJobQuery) 
+  const job = results.rows[0]
+  if(!job){
+    res.status(400)
+    throw new Error('job not found')
+  }
+
+  //  preferable to use one postgres query instead of combining results from multiple queries. DO LATER 
+  const getTranscribeFileQuery = {
+    text: 'SELECT id, name, type, status FROM file WHERE id = $1 limit 1',
+    values: [job.transcribe_fileid]
+  }
+
+  const getReviewFileQuery = {
+    text: 'SELECT id, name, type, status FROM file WHERE id = $1 limit 1',
+    values: [job.review_fileid]
+  }
+
+  const getCompleteFileQuery = {
+    text: 'SELECT id, name, type, status FROM file WHERE id = $1 limit 1',
+    values: [job.complete_fileid]
+  }
+
+  const getOwnerQuery = {
+    text: 'SELECT id, username, email, role FROM \"user\" WHERE id = $1 limit 1',
+    values: [job.owner_id]
+  }
+
+  const getClaimedUserQuery = {
+    text: 'SELECT id, username, email, role FROM \"user\" WHERE id = $1 limit 1',
+    values: [job.claimed_userid]
+  }
+
+  const transcribeFileResults = await pool.query(getTranscribeFileQuery)
+  const reviewFileResults = await pool.query(getReviewFileQuery)
+  const completeFileResults = await pool.query(getCompleteFileQuery)
+  const ownerQueryResults = await pool.query(getOwnerQuery)
+  const claimedUserResults = await pool.query(getClaimedUserQuery)
+
+  job.transcribe_fileid = transcribeFileResults.rows[0] ?  transcribeFileResults.rows[0] : job.transcribe_fileid,
+  job.review_fileid = reviewFileResults.rows[0] ? reviewFileResults.rows[0] : job.review_fileid,
+  job.complete_fileid = completeFileResults.rows[0] ? completeFileResults.rows[0] : job.complete_fileid,
+  job.owner_id = ownerQueryResults.rows[0]
+  job.claimed_userid = claimedUserResults.rows[0] ? claimedUserResults.rows[0] : null
+
+  if(role === 'admin' || job.owner_id === id){
+    res.status(200).json(job)
+    return
+  }
+
+  //  users can only access if the status allows AND is unclaimed
+  const claimableRole = job.status === 'transcribe' ? 'transcriber' : 'reviewer'
+  if(role === 'client' || job.status === 'complete' || claimableRole !== role){
+    res.status(401)
+    throw new Error('unauthorized access')
+  }
+
+  if(job.claimed_userid){
+    res.status(400)
+    throw new Error('job has already been claimed')
+  }
+  res.status(200).json(job)
+}
+
 module.exports = { 
     getAvailableJobs,
     getCurrentJobs,
@@ -320,4 +395,5 @@ module.exports = {
     dropJob,
     getAllActiveJobs,
     getAllInactiveJobs,
+    getJob,
   }

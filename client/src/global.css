@@ -48,6 +48,18 @@ table {
 	border-spacing: 0;
 }
 
+dialog{
+  position: relative;
+  border: none;
+  width: auto;
+  height: auto;
+}
+
+button{
+  border: none;
+  outline: none;
+}
+
 /* GLOBAL CSS STARTS HERE */
 
 /* FONT IMPORTS */
