@@ -116,7 +116,7 @@ const deletejob = async (req,res) => {
   }
   const { id: jobId  } = req.params
   const selectJobQuery = {
-    text: 'SELECT transcribe_fileid, review_fileid, complete_fileid, owner_id FROM job WHERE id = $1 limit 1',
+    text: 'SELECT transcribe_fileid, review_fileid, complete_fileid, owner_id, transcriber_id, reviewer_id FROM job WHERE id = $1 limit 1',
     values: [jobId] 
   }
   const selectJobResult = await pool.query(selectJobQuery)
@@ -153,7 +153,60 @@ const deletejob = async (req,res) => {
           value: jobId
         }]
     }
-    await sendToPM(discordId, deleteJobMessagePM)
+
+    try {
+      await sendToPM(discordId, deleteJobMessagePM)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  if (selectJobResult.rows[0].transcriber_id) {
+    const transcriber = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [selectJobResult.rows[0].transcriber_id])
+    const transcriberDiscordNotify = transcriber.rows[0].togglediscordpm
+
+    if (transcriberDiscordNotify) {
+      const transcriberDiscordId = transcriber.rows[0].discordid
+
+      const deleteJobMessagePM = {
+        title: `Your current job has been deleted by "${req.user.username}".`,
+        description: `Your current job has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
+        color: 0xDC143C,
+        fields: [{
+            name: "Job ID",
+            value: jobId
+        }]
+      }
+
+      try {
+      await sendToPM(transcriberDiscordId, deleteJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  } else if (selectJobResult.rows[0].reviewer_id) {
+    const reviewer = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [selectJobResult.rows[0].reviewer_id])
+    const reviewerDiscordNotify = reviewer.rows[0].togglediscordpm
+    
+    if (reviewerDiscordNotify) {
+      const reviewerDiscordId = reviewer.rows[0].discordid
+
+      const deleteJobMessagePM = {
+        title: `Your current job has been deleted by "${req.user.username}".`,
+        description: `Your current job has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
+        color: 0xDC143C,
+        fields: [{
+            name: "Job ID",
+            value: jobId
+        }]
+      }
+
+      try {
+      await sendToPM(reviewerDiscordId, deleteJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+    }
   }
 
   const deleteJobMesssageChannel = {
@@ -162,11 +215,15 @@ const deletejob = async (req,res) => {
       color: 0xDC143C,
       fields: [{
         name: 'Job ID:',
-        value: `${jobId}`,
+        value: `${jobId}`
       }]
     }
-
-  await sendToChannel(deleteJobMesssageChannel)
+  
+  try {
+    await sendToChannel(deleteJobMesssageChannel)
+  } catch (err) {
+    console.log(err)
+  }
 
   
 

@@ -96,18 +96,47 @@ client.on('ready', async () => {
     const updatePresence = async() => {
 
         const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true)', ['transcribe', 'review'])
-        const openJobs = result.rows.length
+        // count nulls for transcribe and reviewer ids
+        const openJobs = result.rows.filter(row => row.transcriber_id === null && row.reviewer_id === null).length
+
         client.user.presence.set({
             activities: [{name: `${openJobs} Jobs Available`}],
             status: 'online'
         });
     } 
 
+    const updateHeader = async() => {
+        
+        if (process.env.DISCORD_CHANNEL_ID && client.user) {
+            
+            const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID)
+            
+            if (channel) {
+            
+                const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true)', ['transcribe', 'review'])
+                
+                const transcriberJobs = result.rows.filter(row => row.transcriber_id === null && row.status === 'transcribe').length
+                const reviewerJobs = result.rows.filter(row => row.reviewer_id === null && row.status === 'review').length
+                
+                try {
+                    await channel.setTopic(`${transcriberJobs} Transcribe Jobs Available | ${reviewerJobs} Review Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
+                    
+                } catch (error) {
+                    throw new Error(error)
+                }
+            } else {
+                console.log('Channel not found, ignoring updating the channel topic...')
+            }
+            
+        }
+    }
+
     await updatePresence()
+    await updateHeader()
 
     setInterval( async () => {
         await updatePresence()
-
+        await updateHeader()
     } , 1000 * 60 * 5) // every 5 minutes
 
 })
