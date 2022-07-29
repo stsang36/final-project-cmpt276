@@ -37,23 +37,23 @@ https://discord.js.org
 limits: 50 requests per second per bot
 
 ## PATH VARIABLES
-NODE_ENV = development
+NODE_ENV = development (set to production for deployment)
 
 PORT = 5000
 
-DATABASE_URL = 
+DATABASE_URL = (Your postgresql database url)
 
-SENDGRID_API_KEY = SG.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+SENDGRID_API_KEY = SG.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX (Your sendgrid api key)
 
-JWT_SECRET = 
+JWT_SECRET = (Your jwt secret)
 
-FRONTEND_URL = http://localhost:3000
+FRONTEND_URL = http://localhost:3000 (Your frontend url)
 
-NOREPLY_EMAIL = 
+NOREPLY_EMAIL = (Your no-reply email)
 
-DISCORD_TOKEN = 
+DISCORD_TOKEN = (Your discord token)
 
-DISCORD_CHANNEL_ID = 
+DISCORD_CHANNEL_ID = (Your discord channel id)
 
 
 
