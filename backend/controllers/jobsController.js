@@ -1,4 +1,6 @@
 const { pool } = require('../config/pool.js')
+const {sendToChannel, sendToPM } = require('../config/discordBot.js')
+
 require('express-async-errors')
 
 //
@@ -114,7 +116,7 @@ const deletejob = async (req,res) => {
   }
   const { id: jobId  } = req.params
   const selectJobQuery = {
-    text: 'SELECT transcribe_fileid, review_fileid, complete_fileid FROM job WHERE id = $1 limit 1',
+    text: 'SELECT transcribe_fileid, review_fileid, complete_fileid, owner_id, transcriber_id, reviewer_id FROM job WHERE id = $1 limit 1',
     values: [jobId] 
   }
   const selectJobResult = await pool.query(selectJobQuery)
@@ -127,12 +129,105 @@ const deletejob = async (req,res) => {
     values: [jobId]
   }
   await pool.query(deleteJobQuery)
-  const { transcribe_fileid, review_fileid, complete_fileid } = selectJobResult.rows[0]
+  const { transcribe_fileid, review_fileid, complete_fileid, owner_id } = selectJobResult.rows[0]
   const deleteFilesQuery = {
     text: "DELETE FROM file where id IN ($1, $2, $3)",
     values: [transcribe_fileid, review_fileid, complete_fileid]
   }
   await pool.query(deleteFilesQuery)
+
+
+  // discord notification
+  const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+  const discordNotify = owner.rows[0].togglediscordpm
+  
+  if (discordNotify) {
+    const discordId = owner.rows[0].discordid
+
+    const deleteJobMessagePM = {
+      title: `Your job has been deleted by "${req.user.username}".`,
+      description: `Your job has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
+      color: 0xDC143C,
+      fields: [{
+          name: "Job ID",
+          value: jobId
+        }]
+    }
+
+    try {
+      await sendToPM(discordId, deleteJobMessagePM)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  if (selectJobResult.rows[0].transcriber_id) {
+    const transcriber = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [selectJobResult.rows[0].transcriber_id])
+    const transcriberDiscordNotify = transcriber.rows[0].togglediscordpm
+
+    if (transcriberDiscordNotify) {
+      const transcriberDiscordId = transcriber.rows[0].discordid
+
+      const deleteJobMessagePM = {
+        title: `Your current job has been deleted by "${req.user.username}".`,
+        description: `Your current job has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
+        color: 0xDC143C,
+        fields: [{
+            name: "Job ID",
+            value: jobId
+        }]
+      }
+
+      try {
+      await sendToPM(transcriberDiscordId, deleteJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  } else if (selectJobResult.rows[0].reviewer_id) {
+    const reviewer = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [selectJobResult.rows[0].reviewer_id])
+    const reviewerDiscordNotify = reviewer.rows[0].togglediscordpm
+    
+    if (reviewerDiscordNotify) {
+      const reviewerDiscordId = reviewer.rows[0].discordid
+
+      const deleteJobMessagePM = {
+        title: `Your current job has been deleted by "${req.user.username}".`,
+        description: `Your current job has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
+        color: 0xDC143C,
+        fields: [{
+            name: "Job ID",
+            value: jobId
+        }]
+      }
+
+      try {
+      await sendToPM(reviewerDiscordId, deleteJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }
+
+  const deleteJobMesssageChannel = {
+      title: 'Job Deleted.',
+      description: `A job has been deleted.`,
+      color: 0xDC143C,
+      fields: [{
+        name: 'Job ID:',
+        value: `${jobId}`
+      }]
+    }
+  
+  try {
+    await sendToChannel(deleteJobMesssageChannel)
+  } catch (err) {
+    console.log(err)
+  }
+
+  
+
+
   res.status(200).json({message:`job ${jobId} deleted`})
 }
 
@@ -147,7 +242,7 @@ const addJob = async(req, res) => {
     throw new Error('missing data')
   }
   const {id} = req.user
-  const {file, deadline} = req.body
+  const {name, file, deadline} = req.body
   const buf = Buffer.from(file.media, 'base64')
   const uploadFileQuery = {
     text: 'INSERT INTO file(name, type, media) VALUES ($1, $2, $3) RETURNING id',
@@ -160,15 +255,40 @@ const addJob = async(req, res) => {
   }
   const fileId = fileUploadResults.rows[0].id
   const addNewJobQuery = {
-    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline) VALUES ($1, $2, $3) RETURNING id',
-    values: [fileId, id, deadline]
+    text: 'INSERT INTO job(transcribe_fileid, owner_id, deadline, name) VALUES ($1, $2, $3, $4) RETURNING id',
+    values: [fileId, id, deadline, name]
   }
   const jobQueryResults = await pool.query(addNewJobQuery)
   const jobId = jobQueryResults.rows[0].id
+
+  //discord notification
+
+  const newJobMessage = {
+    title: `New Job for Transcribing!`,
+    description: `A new job for transcribing has been posted!\nPlease visit the website to claim it.`,
+    color: 0x0099FF,
+    fields: [{
+      name: 'Job ID:',
+      value: `${jobId}`
+    },{
+      name: 'Creator:',
+      value: `${username}`
+    },{
+      name: 'Deadline:',
+      value: `${jobQueryResults.rows[0].deadline}`
+    }]
+  }
+
+  try {
+    await sendToChannel(newJobMessage)
+  } catch (err) {
+    console.log(err)
+  }
+
   res.status(200).json({
     message: 'job has been posted', 
     jobId: jobId,
-    fileId: fileId
+    fileId: fileId,
   })
 }
 
@@ -187,7 +307,7 @@ const updateJob = async(req, res) => {
     res.status(400)
     throw new Error('missing parameter')
   }
-  const { role, id } = req.user
+  const { role, id} = req.user
   if(role === 'client' || role === 'admin'){
     res.status(401)
     throw new Error('unauthorized access')
@@ -197,8 +317,8 @@ const updateJob = async(req, res) => {
   var newActive = true
   var newStatus = ''
   const file = req.body
-  const findJobResults = await pool.query('SELECT active, status, claimed_userid FROM job WHERE id = $1 limit 1', [jobId])
-  const { status, claimed_userid, active } = findJobResults.rows[0]
+  const findJobResults = await pool.query('SELECT deadline, active, status, claimed_userid, owner_id FROM job WHERE id = $1 limit 1', [jobId])
+  const { status, claimed_userid, active, owner_id, deadline } = findJobResults.rows[0]
   if(!active || claimed_userid !== id){
     res.status(401)
     throw new Error('unauthorized access')
@@ -232,6 +352,86 @@ const updateJob = async(req, res) => {
     values: [newFileId, id, newStatus, newActive, jobId]
   }
   await pool.query(updateJobQuery)
+
+  //discord notification
+
+  const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+  const discordNotify = owner.rows[0].togglediscordpm
+
+  if (discordNotify) {
+    const discordId = owner.rows[0].discordid
+
+    if(newStatus === 'complete') {
+
+      const completeJobMessagePM = {
+        title: `Your job has been completed by "${req.user.username}".`,
+        description: `Your job with ID: ${jobId} "${file.name}" has been completed.\nYou can download the file from the website.`,
+        color: 0x57F287
+      }
+
+      try {
+        await sendToPM(discordId, completeJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+
+    } else {
+
+      const updateJobMessage = {
+        title: `Job updated.`,
+        description: `Your job with filename, "${file.name}" has been updated from "${status}" to "${newStatus}"!`,
+        color: 0x0099FF,
+        fields: [{
+          name: 'Job ID:',
+          value: `${jobId}`
+        }, {
+          name: `Worker:`,
+          value: `${req.user.username}`
+        }, {
+          name: 'Status:',
+          value: `${newStatus}`
+        }]
+      }
+
+      try {
+        await sendToPM(discordId, updateJobMessage)
+      } catch (err) {
+        console.log(err)
+      }
+
+    }
+  }
+
+  if (newStatus === 'review') {
+    const reviewStatusMessage = {
+      title: `New Job for Reviewing!`,
+      description: `A job needs to be reviewed.\nPlease visit the website to review it.`,
+      color: 0x0099FF,
+      fields: [{
+        name: 'Job ID:',
+        value: `${jobId}`
+      }, {
+        name: 'Creator:',
+        value: `${owner.rows[0].username}`,
+        inline: true
+      }, {
+        name: 'Transcriber:',
+        value: `${req.user.username}`,
+        inline: true
+      }, {
+        name: 'Deadline:',
+        value: `${deadline}`
+      }]
+    }
+
+    try {
+      await sendToChannel(reviewStatusMessage)
+    } catch (err) {
+      console.log(err)
+    }
+
+  }
+
   res.status(200).json({message: 'success'})
 }
 
@@ -248,7 +448,7 @@ const claimJob = async(req, res) => {
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const findJobObj = await pool.query('SELECT claimed_userid, status, active FROM job WHERE id = $1 limit 1', [jobId])
+  const findJobObj = await pool.query('SELECT claimed_userid, owner_id, status, active FROM job WHERE id = $1 limit 1', [jobId])
   const job = findJobObj.rows[0]
   if(!job){
     res.status(400)
@@ -270,6 +470,35 @@ const claimJob = async(req, res) => {
       values: [id, jobId]
     }
     await pool.query(claimJobQuery)
+
+    //discord notification
+    const owner_id = job.owner_id
+    const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+    const discordNotify = owner.rows[0].togglediscordpm
+
+    if (discordNotify) {
+      const discordId = owner.rows[0].discordid
+      const claimJobMessagePM = {
+        title: `${req.user.username} has Claimed your Job.`,
+        description: `Your job has been claimed by ${req.user.username}.\nPlease contact the ${req.user.username} if you have any questions.`,
+        color: 0x0099FF,
+        fields: [{
+          name: 'Job ID:',
+          value: `${jobId}`
+        }, {
+          name: 'Claimed by:',
+          value: `${req.user.username}`
+        }, {
+          name: 'Status:',
+          value: `${job.status}`
+        }]
+      }
+      try {
+        await sendToPM(discordId, claimJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+    }
     res.status(200).json({message: 'job has been claimed successfully'})
   }else{
     res.status(400)
@@ -289,7 +518,7 @@ const dropJob = async(req, res) => {
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const findJobObj = await pool.query('SELECT claimed_userid FROM job WHERE id = $1 limit 1', [jobId])
+  const findJobObj = await pool.query('SELECT claimed_userid, owner_id, deadline, status FROM job WHERE id = $1 limit 1', [jobId])
   const job = findJobObj.rows[0]
   if(!job){
     res.status(400)
@@ -301,11 +530,145 @@ const dropJob = async(req, res) => {
       values: [null, jobId]
     }
     await pool.query(claimJobQuery)
+
+    // discord notification
+    const owner_id = job.owner_id
+    const owner = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [owner_id])
+    const discordNotify = owner.rows[0].togglediscordpm
+    const ownerUsername = owner.rows[0].username
+    
+    if (discordNotify) {
+      const discordId = owner.rows[0].discordid
+      const dropJobMessagePM = { 
+        title: `Your Job has been Dropped.`,
+        description: `Your job has been dropped. \nAnother person can claim it.`,
+        color: 0xDC143C,
+        fields: [{
+          name: 'Job ID:',
+          value: `${jobId}`
+        }, {
+          name: 'Dropped by:',
+          value: `${req.user.username}`
+        }]
+      }
+
+      try {
+        await sendToPM(discordId, dropJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    
+    const dropJobMessageChannel = {
+      title: `Available Job!`,
+      description: `A job from "${ownerUsername}" is available to be claimed!\nPlease visit the website to claim it.`,
+      color: 0x0099FF,
+      fields: [{
+        name: 'Job ID:',
+        value: `${jobId}`
+      }, {
+        name: 'Creator:',
+        value: `${ownerUsername}`,
+        inline: true
+      }, {
+        name: 'Status:',
+        value: `Need to ${job.status}`,
+        inline: true
+      }, {
+        name: 'Deadline:',
+        value: `${job.deadline}`
+      }]
+    }
+
+    try {
+      await sendToChannel(dropJobMessageChannel)
+    } catch (err) {
+      console.log(err)
+    }
+      
+  
+    
+  
     res.status(200).json({message: 'job has been successfully dropped'})
   }else{
     res.status(401)
     throw new Error('unauthorized access')
   }
+}
+
+//  @route    GET /api/job/one/:id
+//  @params   id: id of job obj
+//  @desc     drops claimed job of user
+//  @access   PRIVATE
+const getJob = async(req, res) => {
+  const { id: jobId } = req.params
+  const { id, role } = req.user
+  const getJobQuery = {
+    text: 'SELECT * FROM job WHERE id = $1 limit 1',
+    values: [jobId]
+  }
+  const results = await pool.query(getJobQuery) 
+  const job = results.rows[0]
+  if(!job){
+    res.status(400)
+    throw new Error('job not found')
+  }
+
+  //  preferable to use one postgres query instead of combining results from multiple queries. DO LATER 
+  const getTranscribeFileQuery = {
+    text: 'SELECT id, name, type, status FROM file WHERE id = $1 limit 1',
+    values: [job.transcribe_fileid]
+  }
+
+  const getReviewFileQuery = {
+    text: 'SELECT id, name, type, status FROM file WHERE id = $1 limit 1',
+    values: [job.review_fileid]
+  }
+
+  const getCompleteFileQuery = {
+    text: 'SELECT id, name, type, status FROM file WHERE id = $1 limit 1',
+    values: [job.complete_fileid]
+  }
+
+  const getOwnerQuery = {
+    text: 'SELECT id, username, email, role FROM \"user\" WHERE id = $1 limit 1',
+    values: [job.owner_id]
+  }
+
+  const getClaimedUserQuery = {
+    text: 'SELECT id, username, email, role FROM \"user\" WHERE id = $1 limit 1',
+    values: [job.claimed_userid]
+  }
+
+  const transcribeFileResults = await pool.query(getTranscribeFileQuery)
+  const reviewFileResults = await pool.query(getReviewFileQuery)
+  const completeFileResults = await pool.query(getCompleteFileQuery)
+  const ownerQueryResults = await pool.query(getOwnerQuery)
+  const claimedUserResults = await pool.query(getClaimedUserQuery)
+
+  job.transcribe_fileid = transcribeFileResults.rows[0] ?  transcribeFileResults.rows[0] : job.transcribe_fileid,
+  job.review_fileid = reviewFileResults.rows[0] ? reviewFileResults.rows[0] : job.review_fileid,
+  job.complete_fileid = completeFileResults.rows[0] ? completeFileResults.rows[0] : job.complete_fileid,
+  job.owner_id = ownerQueryResults.rows[0]
+  job.claimed_userid = claimedUserResults.rows[0] ? claimedUserResults.rows[0] : null
+
+  if(role === 'admin' || job.owner_id === id){
+    res.status(200).json(job)
+    return
+  }
+
+  //  users can only access if the status allows AND is unclaimed
+  const claimableRole = job.status === 'transcribe' ? 'transcriber' : 'reviewer'
+  if(role === 'client' || job.status === 'complete' || claimableRole !== role){
+    res.status(401)
+    throw new Error('unauthorized access')
+  }
+
+  if(job.claimed_userid){
+    res.status(400)
+    throw new Error('job has already been claimed')
+  }
+  res.status(200).json(job)
 }
 
 module.exports = { 
@@ -320,4 +683,5 @@ module.exports = {
     dropJob,
     getAllActiveJobs,
     getAllInactiveJobs,
+    getJob,
   }

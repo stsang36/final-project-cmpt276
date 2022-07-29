@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux'
 import { logout } from 'redux/slices/authSlice'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 const Sidebar = () => {
   const { user } = useSelector(state => state.auth)
@@ -13,6 +14,7 @@ const Sidebar = () => {
   const navigate = useNavigate()
   const handleClick = () => {
     dispatch(logout())
+    toast.success('Signed out')
     navigate('/auth/login')
   }
 

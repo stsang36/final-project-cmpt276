@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import style from './style.module.css'
 import Button from 'common/components/Button'
-import { Buffer } from 'buffer'
 import moment from 'moment'
 import { useCreateJobMutation } from 'redux/slices/jobSlice'
 import { useNavigate } from 'react-router-dom'
@@ -10,19 +9,20 @@ import FileInput from '../../../../common/components/FileInput'
 
 const CreateJobForm = () => {
   const navigate = useNavigate()
-  const [ file, setFile ] = useState('') 
   const ref = useRef()
-  const [ deadline, setDeadline ] = useState(moment().add(1, 'day').format())
   const [ createJob, results ] = useCreateJobMutation()
+  const [ file, setFile ] = useState('') 
+  const [ deadline, setDeadline ] = useState(moment().add(1, 'day').format())
+  const [ name, setName ] = useState('')
   const [ disableSubmit, setDisableSubmit ] = useState(false)
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    if(!file || !deadline){
-      toast.warn('Must include deadline and file')
+    if(!file || !deadline || !name){
+      toast.warn('Must include deadline, file and name')
       return
     }
-    createJob({file, deadline})
+    createJob({file, deadline, name})
   }
 
   const handleDateTimeChange = (event) => {
@@ -57,9 +57,17 @@ const CreateJobForm = () => {
         setSubmitFile={setFile}
         status='transcribe'
         setDisableSubmit={setDisableSubmit}
-        supportedExtensions={['pdf', 'doc', 'docx', 'pptx', 'rtf', 'zip', 'md']}
+        supportedExtensions={['pdf', 'doc', 'docx', 'pptx', 'rtf', 'zip', 'md', 'html', 'txt']}
       />
-      <label for='deadlineInput' className={style.deadlineInput}>
+      <label htmlFor='name' className={style.nameInput}>
+        Job Name:
+        <input
+          type='text'
+          onChange={(e)=>setName(e.target.value)}
+          placeholder='Enter a name here'
+        />
+      </label>
+      <label htmlFor='deadlineInput' className={style.deadlineInput}>
         Select a deadline:
         <input
           className={style.inputDate} 

@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 dotenv.config({path: '../.env'})
 const { pool } = require('../config/pool.js')
+const server = require('../server.js')
 
 const { 
     loginCheck, 
@@ -60,13 +61,19 @@ before( () => {
         throw new Error('This test suite should only be run in development mode')
     }
 
+    it ('discord bot', (done) => {
+        server.on('DISCORD_LOGIN_SUCCESS', () => {
+            done()
+        })
+    })
+
     it('Create admin account if it doesn\'t exist', (done) => {
         const checkAdminQuery = `SELECT * FROM \"user\" WHERE username = 'admin'`
         pool.query(checkAdminQuery).then((checkAdmin) => {
             if (checkAdmin.rowCount === 0) {
                 const adminInsertQuery = {
-                    text: 'INSERT into \"user\" (username, password, email, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-                    values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S','admin@poggers.com', 'admin', false, true]
+                    text: 'INSERT into \"user\" (username, password,  email, discordid, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+                    values: ['admin', '$2a$10$VUAoMDwxp6N.GeYNeUgWKu6ySLi9SzIQES2pgrTbTHt6DiypOa1/S','admin@poggers.com', '146787205606539264', 'admin', true, true]
                 }
                 pool.query(adminInsertQuery)
                     .then( (result) => {
@@ -113,9 +120,10 @@ before( () => {
 
 })
 
+
 describe('Login System:', () => {
-    it('should register a new user on a POST request /api/user', registerCheck)
-    it('should login to newly created account on POST request /api/user/login', loginCheck)
+    it('should register a new user on a POST /api/user', registerCheck)
+    it('should login to newly created account on POST /api/user/login', loginCheck)
     it('should get the latest account settings on GET /api/user/settings using own token', settingCheck)
     it('should email user on forgetPassword on POST /api/user/forgotpassword/:user' , emailCheck)
     it('should update the account settings on PUT /api/user/settings', updateSettingCheck)
@@ -124,7 +132,6 @@ describe('Login System:', () => {
     it('should update user role on PUT /api/user/admin', updateUserRoleCheck)
     it('should get all users with admin token on GET /api/user/',  getAllUsersCheck)
     it('should delete newly created account on DELETE request /api/user/admin/:id', deleteUserCheck)
-
 });
 
 
@@ -136,16 +143,17 @@ describe('File System:', () => {
 });
 
 describe('Job system:', () => {
-    it('should get all available jobs by roles from /api/job', getAvailableJobscheck)
-    it('should get all active jobs for the admin from /api/job/admin/active', getAllActiveJobscheck)
-    it('should get all active jobs for the admin from /api/job/admin/inactive', getAllinActiveJobscheck)
-    it('should get all jobs created by the user from /api/job/my', getMyJobscheck)
-    it('should get all ongoing jobs created by the user from /api/job/current', getCurrentJobscheck)
-    it('should get all ongoing jobs created by the user from /api/job/past', getPastJobscheck)
-    it('should add a new job and its corresponding files from /api/job', addJobCheck)
+    it('should get all available jobs by roles on GET /api/job', getAvailableJobscheck)
+    it('should get all active jobs for the admin on GET /api/job/admin/active', getAllActiveJobscheck)
+    it('should get all active jobs for the admin on GET /api/job/admin/inactive', getAllinActiveJobscheck)
+    it('should get all jobs created by the user on GET /api/job/my', getMyJobscheck)
+    it('should get all ongoing jobs created by the user on GET /api/job/current', getCurrentJobscheck)
+    it('should get all ongoing jobs created by the user on GET/api/job/past', getPastJobscheck)
+    it('should add a new job and its corresponding files on GET /api/job', addJobCheck)
     it('should claim a job on PUT /api/job/claim/:id', claimJobcheck)
-    it('should update a job on PUT /api/job/update/:id', updateJobCheck)
     it('should drop a job on PUT /api/job/drop/:id', dropJobCheck)
+    it('should claim a job again on PUT /api/job/claim/:id', claimJobcheck)
+    it('should update a job on PUT /api/job/update/:id', updateJobCheck)
     it('should delete a job on DELETE /api/job/admin/delete/:id', deleteJobCheck);
 });
 

@@ -1,10 +1,10 @@
 const express = require('express')
 const dotenv = require('dotenv')
+const { client:discordBot } = require('./config/discordBot')
 dotenv.config({path: '../.env'})
 const { errorHandler } = require('./middleware/errorMiddleware')
 const cors = require('cors')
 const path = require('path')
-
 // start up app 
 const app = express()
 const PORT = process.env.PORT
@@ -33,6 +33,9 @@ if(process.env.NODE_ENV === 'production'){
 
 app.use(errorHandler)
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+discordBot.login(process.env.DISCORD_TOKEN).then(() => {
+  app.emit('DISCORD_LOGIN_SUCCESS')
+})
 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
 module.exports = app;

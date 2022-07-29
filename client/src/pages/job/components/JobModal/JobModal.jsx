@@ -1,3 +1,4 @@
+import Modal from 'common/components/Modal'
 import style from './style.module.css'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useDropJobMutation, useGetJobQuery, useClaimJobMutation, } from 'redux/slices/jobSlice'
@@ -10,17 +11,17 @@ import { AiFillAlert, AiFillEye } from 'react-icons/ai'
 import { MdCreateNewFolder, MdDownloadForOffline } from 'react-icons/md'
 import { BsFillPersonFill, BsInfoCircleFill } from 'react-icons/bs'
 import { IoNewspaper } from 'react-icons/io5'
+import { HiChevronDoubleRight, HiOutlineArrowsExpand } from 'react-icons/hi'
 import FileIcon from '../../../../common/components/FileIcon'
 import { motion } from 'framer-motion'
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
+import { fileButtonVariants } from '../utils/variants'
 import ActivityStatus from 'common/components/ActivityStatus'
 import JobStatus from 'common/components/JobStatus'
-import { fileButtonVariants } from '../utils/variants'
 import { calculateTimeLeft } from 'common/utils/calculateTimeLeft'
 
-
-const JobContainer = () => {
+const JobModal = () => {
   const dispatch = useDispatch()
   const { id } = useParams()
   const navigate = useNavigate()
@@ -29,10 +30,13 @@ const JobContainer = () => {
   const [ dropJob, dropResults ] = useDropJobMutation()
   const { user: { role, id: userId } } = useSelector(state => state.auth)
 
-  useEffect(() => {
-    document.title = `Bytetools | Viewing Job ${data ? data.name : ''}`
-    return () => document.title = 'Bytetools'
-  },[])
+  const handleClaimJob = () => {
+    claimJob({id})
+  }
+
+  const handleDropJob = () => {
+    dropJob({id})
+  }
 
   useEffect(() => {
     const { isSuccess, isError, error, reset } = claimResults
@@ -65,17 +69,36 @@ const JobContainer = () => {
   },[dropResults])
 
   return (
-    <motion.main className={style.main}>
-      <header>
-        <h1 className={style.pageHeading}>Viewing Job</h1>
-      </header>
+    <Modal
+      closeModal={()=>navigate(-1)}
+      type='rightpeek'
+      className={style.modal}
+    >
+      <ul className={style.controls}>
+        <li>
+          <button 
+            className={style.controlBtn}
+            onClick={()=>navigate(-1)}
+          >
+            <HiChevronDoubleRight className={style.icon}/>
+          </button>
+        </li>
+        <li>
+          <button 
+            className={style.controlBtn}
+            onClick={()=>navigate(`/viewjob/${id}`)}
+          >
+            <HiOutlineArrowsExpand className={style.icon}/>
+          </button>
+        </li>
+      </ul>
       {data && (
-        <section className={style.container}>
-          <section className={style.infoContainer}>
-            <h1 className={style.jobName}>
-              {data.name}
-              <ActivityStatus active={data.active} />
-            </h1>
+        <>
+          <h1 className={style.jobName}>
+            {data.name} 
+            <ActivityStatus active={data.active} />
+          </h1>
+          <section className={style.jobData}>
             <ul className={style.ul}>
               <li className={style.li}>
                 <p>
@@ -120,7 +143,7 @@ const JobContainer = () => {
                 {data.claimed_userid && (data.claimed_userid.id === userId) ? (
                   <p>You</p>
                 ) : (
-                  <p>{data.claimed_userid ? data.claimed_userid.username : 'unclaimed'}</p>
+                  <p>{data.claimed_userid ? data.claimed_userid.username : 'Unclaimed'}</p>
                 )}
               </li>
               <li className={style.li}>
@@ -143,8 +166,8 @@ const JobContainer = () => {
               </li>
             </ul>
           </section>
-          <section className={style.filesContainer}>
-            <h1 className={style.filesH1}>Download Files</h1>
+          <section className={style.files}>
+            <h3 className={style.h3}>Download Files</h3>
             <ul className={style.fileList}>
               <li>
                 <p className={style.jobStatus}>
@@ -234,25 +257,25 @@ const JobContainer = () => {
                 </motion.button>
               </li>
             </ul>
-            {!data.claimed_userid && role !== 'client' && role !== 'admin' && (
+          </section>
+          {!data.claimed_userid && role !== 'client' && role !== 'admin' && (
             <Button 
               text='Claim Job'
               className={style.claimBtn}
-              onClick={()=>claimJob({id})}
+              onClick={handleClaimJob}
             />
            )}
            {data.claimed_userid && data.claimed_userid.id === userId && (
             <Button 
               text='Drop Job'
               className={style.dropBtn}
-              onClick={()=>dropJob({id})}
+              onClick={handleDropJob}
             />
           )}
-          </section>
-        </section>
+        </>
       )}
-    </motion.main>
+    </Modal>
   )
 }
 
-export default JobContainer
+export default JobModal
