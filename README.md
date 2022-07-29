@@ -55,7 +55,9 @@ DISCORD_TOKEN = (Your discord token)
 
 DISCORD_CHANNEL_ID = (Your discord channel id)
 
+LOCALE = en-CA
 
+TIMEZONE = Canada/Pacific
 
 # scripts to get started (development purposes only)
 #### npm i
