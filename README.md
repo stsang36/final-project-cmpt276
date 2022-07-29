@@ -9,7 +9,7 @@ The client wants a web application to divide this work between its transcribers 
 ### How would the project make the client's life better?
 
 The current system that Bytetools uses has many drawbacks. Every time a client needs a new job, they have to email it themselves to Bytetools. Also, the distribution of jobs is unorganized and has a long wait time before someone can claim a job. This is because transcribers and reviewers are not notified as quickly when a new job is available to them. It is harder for Bytetools to track all ongoing jobs using their email system. 
-With our application, the client can submit job requests and view their status as it is processed. Clients will be notified accordingly through discord/email with status updates. Then the application will send a notification to all transcribers as soon as a new job they can work on is posted. The transcriber will be able to download the file from the application and upload a transcribed file and submit it to be reviewed. The transcriber will be able to view job information about their current jobs. This will help keep jobs more organized and workflow more efficient. When a document is ready for review, reviewers will also be notified and claim the job that they want. They can then download the document and make changes and upload a final copy and submit it to the client directly through the web app. The client will then be notified that the job has been completed and be able to download the end product from the application. With our application, the job requests will be organized and processed in a timely manner, instead of it being in a disorganized email system. This distribution and notifications of jobs will be automated through our system allowing for a more efficient workflow, and ease of use for clients.
+With our application, the client can submit a job request and view the status of the job as it is processed. Clients will be notified accordingly through discord/email with status updates. Then the application will send a notification to all transcribers as soon as a new job is posted. The transcriber will be able to download the file from the application and upload a transcribed file and submit it to be reviewed. The transcriber will be able to view information about their current jobs. This will help keep jobs more organized and workflow more efficient. When a document is ready for review, reviewers will also be notified and will be able to claim the job  they want. They can download the document, make changes to it, then upload a final copy and submit it to the client directly using the web app. The client will then be notified that the job has been completed and they would be able to download the end product from the application. With our application, the job requests will be organized and processed in a timely manner, instead of it being in a disorganized email system. This distribution and notifications of jobs will be automated through our system allowing for a more efficient workflow, and ease of use for clients.
 
 ## Features:
 
@@ -35,6 +35,29 @@ limits: 100 emails/ day
 **DISCORD API:** 
 https://discord.js.org
 limits: 50 requests per second per bot
+
+## PATH VARIABLES
+NODE_ENV = development (set to production for deployment)
+
+PORT = 5000
+
+DATABASE_URL = (Your postgresql database url)
+
+SENDGRID_API_KEY = SG.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX (Your sendgrid api key)
+
+JWT_SECRET = (Your jwt secret)
+
+FRONTEND_URL = http://localhost:3000 (Your frontend url)
+
+NOREPLY_EMAIL = (Your no-reply email)
+
+DISCORD_TOKEN = (Your discord token)
+
+DISCORD_CHANNEL_ID = (Your discord channel id)
+
+LOCALE = en-CA
+
+TIMEZONE = Canada/Pacific
 
 # scripts to get started (development purposes only)
 #### npm i
