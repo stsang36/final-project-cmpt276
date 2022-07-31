@@ -11,11 +11,12 @@
 .jobsTable{
   display: flex;
   flex-direction: column;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
 }
 .jobsHeader{
   display: grid;
   grid-template-rows: 1fr;
-  grid-template-columns: repeat(7, 1fr) 0rem;
+  grid-template-columns: 5rem repeat(7, 1fr) 0rem;
   justify-items: start;
   background: white;
   font-weight: 500;
@@ -30,8 +31,64 @@
 .job{
   display: grid;
   grid-template-rows: 1fr;
-  grid-template-columns: repeat(7, 1fr) 0rem;
+  grid-template-columns: 5rem repeat(7, 1fr) 0rem;
   background: white;
   justify-items: start;
   padding: 1rem 3rem;
+}
+
+/* DELETE MODAL */
+
+.deleteModal{
+  display: grid;
+  padding: 2rem;
+  width: clamp(250px, 300px, 100%);
+  grid-template-rows: 2fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 1rem;
+  border-radius: 7px;
+  grid-template-areas: 
+    "icon icon"
+    "message message"
+    "button1 button2";
+}
+
+.alertIcon{
+  font-size: 4rem;
+  grid-area: icon;
+  justify-self: center;
+  align-self: center;
+}
+
+.deleteMessage{
+  grid-area: message;
+  font-size: 1.2rem;
+  justify-self: center;
+  text-align: center;
+}
+
+.cancelBtn{
+  grid-area: button1;
+  padding: 0.5rem;
+  justify-self: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+}
+
+.deleteBtn{
+  grid-area: button2;
+  background-color: crimson;
+  color: white;
+  justify-self: center;
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+}
+
+.dropdownLink .icon{
+  font-size: 1.3rem;
+}
+
+.dropdownBtn .icon{
+  font-size: 1.3rem;
 }

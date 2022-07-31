@@ -95,9 +95,9 @@ client.on('ready', async () => {
 
     const updatePresence = async() => {
 
-        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true)', ['transcribe', 'review'])
+        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL) ', ['transcribe', 'review'])
         // count nulls for transcribe and reviewer ids
-        const openJobs = result.rows.filter(row => row.transcriber_id === null && row.reviewer_id === null).length
+        const openJobs = result.rows.length
 
         client.user.presence.set({
             activities: [{name: `${openJobs} Jobs Available`}],
@@ -113,10 +113,10 @@ client.on('ready', async () => {
             
             if (channel) {
             
-                const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true)', ['transcribe', 'review'])
+                const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL)', ['transcribe', 'review'])
                 
-                const transcriberJobs = result.rows.filter(row => row.transcriber_id === null && row.status === 'transcribe').length
-                const reviewerJobs = result.rows.filter(row => row.reviewer_id === null && row.status === 'review').length
+                const transcriberJobs = result.rows.filter(row => row.status === 'transcribe').length
+                const reviewerJobs = result.rows.filter(row => row.status === 'review').length
                 
                 try {
                     await channel.setTopic(`${transcriberJobs} Transcribe Jobs Available | ${reviewerJobs} Review Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)

@@ -4,12 +4,13 @@ export const jobExtendedApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     //  All Roles
     createJob: builder.mutation({
-      query: ({file, deadline}) => ({
+      query: ({file, deadline, name}) => ({
         url: '/job',
         method: 'POST',
         body: { 
           file, 
-          deadline 
+          deadline,
+          name, 
         }
       }),
       invalidatesTags: ['Job']
@@ -17,6 +18,9 @@ export const jobExtendedApiSlice = apiSlice.injectEndpoints({
     getMyJobs: builder.query({
       query: () => '/job/my',
       providesTags: ['Job']
+    }),
+    getJob: builder.query({
+      query: ({id}) => `/job/one/${id}`
     }),
     // only transcriber & reviewers
     getAvailableJobs: builder.query({
@@ -75,6 +79,7 @@ export const jobExtendedApiSlice = apiSlice.injectEndpoints({
 export const {
   useCreateJobMutation,
   useGetMyJobsQuery,
+  useGetJobQuery,
   useGetAvailableJobsQuery,
   useGetCurrentJobsQuery,
   useGetPastJobsQuery,

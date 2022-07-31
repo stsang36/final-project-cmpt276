@@ -8,6 +8,7 @@ import { getFilesSize } from 'pages/create/utils/getFilesSize'
 import { toast } from 'react-toastify'
 import JSZip from 'jszip'
 import { Buffer } from 'buffer'
+import FileIcon from '../FileIcon'
 
 const generateAcceptedExtStr = (extensionsArray) => {
   var string = ''
@@ -101,6 +102,10 @@ const FileInput = ({className, supportedExtensions, setSubmitFile, maxFiles, max
       toast.warn(`You have exceeded the maximum number of files: ${maxFiles}`)
       return
     }
+    if(files.length === maxFiles){
+      toast.warn(`You have reached the maximum number of files: ${maxFiles}`)
+      return
+    }
     if(getFilesSize(files) > maxSize){
       setDisableSubmit(true)
       toast.warn(`You have exceeded the maximum size of files: ${formatBytes(maxSize)}`)
@@ -159,7 +164,7 @@ const FileInput = ({className, supportedExtensions, setSubmitFile, maxFiles, max
         </div>}
         {files.map((file, index) => (
           <div className={style.file} key={index}>
-            <AiOutlineFile className={style.fileIcon}/>
+            <FileIcon className={style.fileIcon} mimeType={file.type}/>
             <div className={style.fileName}>{file.name}</div>
             <div className={style.fileSize}>{formatBytes(file.size)}</div>
             <button 

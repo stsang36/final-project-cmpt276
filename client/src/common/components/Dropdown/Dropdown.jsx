@@ -29,11 +29,14 @@ const Dropdown = ({children}) => {
         {children[0]}
       </button>
       {isOpen &&
-        <ul className={style.dropdownMenu}>
+        <ul 
+          className={style.dropdownMenu}
+        >
           {children.filter((item, idx) => idx !== 0).map((child, index) => (
             <li 
               key={index}
               className={style.item}
+              onClick={()=>setIsOpen(false)}
             >
               {child}
             </li>
