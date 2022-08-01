@@ -1,5 +1,5 @@
 const { pool } = require('../config/pool.js')
-const {sendToChannel, sendToPM } = require('../config/discordBot.js')
+const {sendToReviewers, sendToTranscribers, sendToPM } = require('../config/discordBot.js')
 require('express-async-errors')
 
 //
@@ -120,7 +120,7 @@ const deletejob = async (req,res) => {
   }
   const selectJobResult = await pool.query(selectJobQuery)
   let jobName = selectJobResult.rows[0].name
-  if (!selectJobResult.name) {
+  if (!jobName) {
     jobName = 'Not set.'
   }
 
@@ -228,7 +228,9 @@ const deletejob = async (req,res) => {
         inline: true
       }]
     }
-  await sendToChannel(deleteJobMesssageChannel)
+
+  await sendToTranscribers(deleteJobMesssageChannel)
+  await sendToReviewers(deleteJobMesssageChannel)
   res.status(200).json({message:`job ${jobId} deleted`})
 }
 
@@ -289,7 +291,7 @@ const addJob = async(req, res) => {
     }]
   }
 
-  await sendToChannel(newJobMessage)
+  await sendToTranscribers(newJobMessage)
 
   res.status(200).json({
     message: 'job has been posted', 
@@ -434,7 +436,13 @@ const updateJob = async(req, res) => {
       }]
     }
 
-   await sendToChannel(reviewStatusMessage)
+    if (newStatus === 'review') {
+      try{
+        await sendToReviewers(reviewStatusMessage)
+      } catch(err){
+        console.log(err)
+      }
+    }
   }
 
   res.status(200).json({message: 'success'})
@@ -575,8 +583,12 @@ const dropJob = async(req, res) => {
           value: `${username}`
         }]
       }
+      try {
+        await sendToPM(discordId, dropJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
 
-      await sendToPM(discordId, dropJobMessagePM)
     }
     
     const dropJobMessageChannel = {
@@ -605,7 +617,19 @@ const dropJob = async(req, res) => {
       }]
     }
 
-    await sendToChannel(dropJobMessageChannel)
+    if (job.status === 'transcribe') {
+      try {
+        await sendToTranscribers(dropJobMessageChannel)
+      } catch (err) {
+        console.log(err)
+      }
+    } else if (job.status === 'review') {
+      try {
+        await sendToReviewers(dropJobMessageChannel)
+      } catch (err) {
+        console.log(err)
+      }
+    }
   
     res.status(200).json({message: 'job has been successfully dropped'})
   }else{

@@ -152,6 +152,7 @@ const addJobCheck = (done) => {
     myTime = myTime.toISOString();
 
     fileobj ={
+        name: 'myTestJob',
         deadline: myTime,
         file: {
             'media': file,

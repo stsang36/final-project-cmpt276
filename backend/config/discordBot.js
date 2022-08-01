@@ -6,6 +6,22 @@ const { GatewayIntentBits, Partials } = require('discord.js')
 
 require('express-async-errors')
 
+
+let config = null
+
+const fetchConfig = async () => {
+    const query = `SELECT * FROM \"config\"`
+    const result = await pool.query(query)
+    config = new Object()
+    if (result.rows.length > 0) {
+        config.transcribe_channel_id = result.rows[0].transcribers_channel_id
+        config.review_channel_id = result.rows[0].reviewers_channel_id
+        config.toggleNotification = result.rows[0].toggle_discord_notif
+    }
+
+    return;
+}
+
 const client = new discord.Client({
     partials: [Partials.Channel, Partials.Message, Partials.Reaction],
     intents: [
@@ -16,10 +32,56 @@ const client = new discord.Client({
     disableEveryone: true
 })
 
-const sendToChannel = async (message) => {
+const sendToTranscribers = async (message) => {
 
-    if (process.env.DISCORD_CHANNEL_ID && client.user) {
-        const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID)
+    if (!config.transcribe_channel_id) {
+        await fetchConfig()
+    }
+
+    if (!config.toggleNotification) {
+        console.log('Notification is disabled, ignoring sending a message to transcribers...')
+        return;
+    }
+
+    if (config.transcribe_channel_id && client.user) {
+        const channel = await client.channels.fetch(config.transcribe_channel_id)
+        if (channel) {
+            const embedMessage = new discord.EmbedBuilder()
+            embedMessage.setTitle(message.title)
+            embedMessage.setDescription(message.description)
+            embedMessage.setColor(message.color)
+            embedMessage.setTimestamp()
+            embedMessage.setFooter({text: 'Bytetools Job Notification'})
+
+            if (message.fields) {
+                embedMessage.addFields(message.fields)
+            }
+
+            try {
+                await channel.send({embeds: [embedMessage]})
+            } catch (error) {
+                throw new Error(error)
+            }
+        } else {
+            console.log('Channel not found, ignoring sending a server message...')
+        }
+      }
+
+}
+
+const sendToReviewers = async (message) => {
+    
+    if (!config.review_channel_id) {
+        await fetchChannelIds()
+    }
+
+    if (!config.toggleNotification) {
+        console.log('Notification is disabled, ignoring sending a message to reviewers...')
+        return;
+    }
+
+    if (config.review_channel_id && client.user) {
+        const channel = await client.channels.fetch(config.review_channel_id)
         if (channel) {
             const embedMessage = new discord.EmbedBuilder()
             embedMessage.setTitle(message.title)
@@ -106,26 +168,55 @@ client.on('ready', async () => {
     } 
 
     const updateHeader = async() => {
-        
-        if (process.env.DISCORD_CHANNEL_ID && client.user) {
+
+        if (!config) {
+            await fetchConfig()
+        }
+
+        if (!config.toggleNotification) {
+            console.log('Notification is disabled, ignoring updating the header...')
+            return;
+        }
             
-            const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID)
+        if (config && client.user) {
+            let reviewChannel = null
+            let transcribeChannel = null
             
-            if (channel) {
+            if (config.review_channel_id) {
+                reviewChannel = await client.channels.fetch(config.review_channel_id)
+            }
+
+            if (config.transcribe_channel_id) {
+                transcribeChannel = await client.channels.fetch(config.transcribe_channel_id)
+            }
             
-                const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL)', ['transcribe', 'review'])
-                
-                const transcriberJobs = result.rows.filter(row => row.status === 'transcribe').length
+            const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL)', ['transcribe', 'review'])
+
+            if (reviewChannel) {
+            
                 const reviewerJobs = result.rows.filter(row => row.status === 'review').length
                 
                 try {
-                    await channel.setTopic(`${transcriberJobs} Transcribe Jobs Available | ${reviewerJobs} Review Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
+                    await reviewChannel.setTopic(` ${reviewerJobs} Review Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
                     
                 } catch (error) {
                     throw new Error(error)
                 }
             } else {
-                console.log('Channel not found, ignoring updating the channel topic...')
+                console.log('Reviewer channel not found, ignoring updating the channel topic...')
+            }
+
+            if (transcribeChannel) {
+                const transcriberJobs = result.rows.filter(row => row.status === 'transcribe').length
+                
+                try {
+                    await transcribeChannel.setTopic(`${transcriberJobs} Transcribe Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
+                    
+                } catch (error) {
+                    throw new Error(error)
+                }
+            } else {
+                console.log('Transcriber channel not found, ignoring updating the channel topic...')
             }
             
         }
@@ -148,7 +239,8 @@ client.on('ready', async () => {
 
 module.exports = { 
     client,
-    sendToChannel,
+    sendToTranscribers,
+    sendToReviewers,
     sendToPM
 } 
 

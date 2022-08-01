@@ -36,6 +36,9 @@ app.use(errorHandler)
 
 discordBot.login(process.env.DISCORD_TOKEN).then(() => {
   app.emit('DISCORD_LOGIN_SUCCESS')
+}).catch(err => { 
+  console.log("Error logging in to Discord: ", err)
+  app.emit('DISCORD_LOGIN_FAILURE')
 })
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
