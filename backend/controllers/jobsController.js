@@ -1,6 +1,5 @@
 const { pool } = require('../config/pool.js')
 const {sendToChannel, sendToPM } = require('../config/discordBot.js')
-
 require('express-async-errors')
 
 //
@@ -19,13 +18,13 @@ const getAvailableJobs = async (req, res) => {
   }
   if(role === 'transcriber'){
     getJobsByRoleQuery = {
-      text: 'SELECT * FROM job WHERE status = $1 AND claimed_userid IS NULL',
+      text: 'SELECT * FROM job WHERE status = $1 AND claimed_userid IS NULL AND active = true ORDER BY "deadline"',
       values: ['transcribe']
     }
   }
   if(role === 'reviewer'){
     getJobsByRoleQuery = {
-      text: 'SELECT * FROM job where status = $1 AND claimed_userid IS NULL',
+      text: 'SELECT * FROM job where status = $1 AND claimed_userid IS NULL AND active = true ORDER BY "deadline"',
       values: ['review']
     }
   }
@@ -40,7 +39,7 @@ const getAllActiveJobs = async(req, res) => {
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const results = await pool.query('SELECT * FROM job WHERE active = TRUE')
+  const results = await pool.query('SELECT * FROM job WHERE active = TRUE ORDER BY "deadline"')
   res.status(200).json(results.rows)
 }
 
@@ -52,7 +51,7 @@ const getAllInactiveJobs = async(req, res) => {
     res.status(401)
     throw new Error('unauthorized access')
   }
-  const results = await pool.query('SELECT * FROM job WHERE active = FALSE')
+  const results = await pool.query('SELECT * FROM job WHERE active = FALSE ORDER BY "deadline" DESC')
   res.status(200).json(results.rows)
 }
 
@@ -63,7 +62,7 @@ const getAllInactiveJobs = async(req, res) => {
 const getMyJobs = async(req,res) => {
   const { id } = req.user
   const getMyJobsQuery = {
-    text: 'SELECT * FROM job WHERE owner_id = $1',
+    text: 'SELECT * FROM job WHERE owner_id = $1 ORDER BY "deadline"',
     values: [id]
   }
   const result = await pool.query(getMyJobsQuery)
@@ -81,7 +80,7 @@ const getCurrentJobs = async(req, res) => {
   }
   const { id } = req.user
   const getCurrentJobsQuery = {
-    text: 'SELECT * from job where claimed_userid = $1',
+    text: 'SELECT * from job where claimed_userid = $1 ORDER BY "deadline"',
     values: [id]
   }
   const result = await pool.query(getCurrentJobsQuery)
@@ -164,11 +163,7 @@ const deletejob = async (req,res) => {
         }]
     }
 
-    try {
-      await sendToPM(discordId, deleteJobMessagePM)
-    } catch (err) {
-      console.log(err)
-    }
+    await sendToPM(discordId, deleteJobMessagePM)
   }
 
   if (selectJobResult.rows[0].transcriber_id) {
@@ -192,12 +187,7 @@ const deletejob = async (req,res) => {
             inline: true
         }]
       }
-
-      try {
       await sendToPM(transcriberDiscordId, deleteJobMessagePM)
-      } catch (err) {
-        console.log(err)
-      }
     }
   } else if (selectJobResult.rows[0].reviewer_id) {
     const reviewer = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [selectJobResult.rows[0].reviewer_id])
@@ -220,12 +210,7 @@ const deletejob = async (req,res) => {
             inline: true
         }]
       }
-
-      try {
-      await sendToPM(reviewerDiscordId, deleteJobMessagePM)
-      } catch (err) {
-        console.log(err)
-      }
+      await sendToPM(reviewerDiscordId, deleteJobMessagePM) 
     }
   }
 
@@ -243,16 +228,7 @@ const deletejob = async (req,res) => {
         inline: true
       }]
     }
-  
-  try {
-    await sendToChannel(deleteJobMesssageChannel)
-  } catch (err) {
-    console.log(err)
-  }
-
-  
-
-
+  await sendToChannel(deleteJobMesssageChannel)
   res.status(200).json({message:`job ${jobId} deleted`})
 }
 
@@ -313,11 +289,7 @@ const addJob = async(req, res) => {
     }]
   }
 
-  try {
-    await sendToChannel(newJobMessage)
-  } catch (err) {
-    console.log(err)
-  }
+  await sendToChannel(newJobMessage)
 
   res.status(200).json({
     message: 'job has been posted', 
@@ -407,11 +379,7 @@ const updateJob = async(req, res) => {
         color: 0x57F287
       }
 
-      try {
-        await sendToPM(discordId, completeJobMessagePM)
-      } catch (err) {
-        console.log(err)
-      }
+      await sendToPM(discordId, completeJobMessagePM)
 
     } else {
 
@@ -435,13 +403,7 @@ const updateJob = async(req, res) => {
           value: `${newStatus}`
         }]
       }
-
-      try {
-        await sendToPM(discordId, updateJobMessage)
-      } catch (err) {
-        console.log(err)
-      }
-
+      await sendToPM(discordId, updateJobMessage)
     }
   }
 
@@ -472,12 +434,7 @@ const updateJob = async(req, res) => {
       }]
     }
 
-    try {
-      await sendToChannel(reviewStatusMessage)
-    } catch (err) {
-      console.log(err)
-    }
-
+   await sendToChannel(reviewStatusMessage)
   }
 
   res.status(200).json({message: 'success'})
@@ -503,7 +460,7 @@ const claimJob = async(req, res) => {
     throw new Error('job not found')
   }
 
-  let  claimableStatus = 'review'
+  let claimableStatus = 'review'
   if(role === 'transcriber'){
     claimableStatus = 'transcribe'
   }
@@ -619,11 +576,7 @@ const dropJob = async(req, res) => {
         }]
       }
 
-      try {
-        await sendToPM(discordId, dropJobMessagePM)
-      } catch (err) {
-        console.log(err)
-      }
+      await sendToPM(discordId, dropJobMessagePM)
     }
     
     const dropJobMessageChannel = {
@@ -652,14 +605,7 @@ const dropJob = async(req, res) => {
       }]
     }
 
-    try {
-      await sendToChannel(dropJobMessageChannel)
-    } catch (err) {
-      console.log(err)
-    }
-      
-  
-    
+    await sendToChannel(dropJobMessageChannel)
   
     res.status(200).json({message: 'job has been successfully dropped'})
   }else{
@@ -724,7 +670,7 @@ const getJob = async(req, res) => {
   job.owner_id = ownerQueryResults.rows[0]
   job.claimed_userid = claimedUserResults.rows[0] ? claimedUserResults.rows[0] : null
 
-  if(role === 'admin' || job.owner_id === id){
+  if(role === 'admin' || job.owner_id.id === id){
     res.status(200).json(job)
     return
   }
@@ -736,7 +682,7 @@ const getJob = async(req, res) => {
     throw new Error('unauthorized access')
   }
 
-  if(job.claimed_userid){
+  if(job.claimed_userid && job.claimed_userid.id !== id){
     res.status(400)
     throw new Error('job has already been claimed')
   }

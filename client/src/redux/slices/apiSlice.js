@@ -14,6 +14,6 @@ export const apiSlice = createApi({
     }
 
   }),
-  tagTypes: ['Job'],
+  tagTypes: ['Job', 'User', 'Config', 'Settings'],
   endpoints: () => ({})
 })

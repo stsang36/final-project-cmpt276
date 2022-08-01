@@ -1,5 +1,8 @@
 .adminContainer{
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .h1{
@@ -7,6 +10,28 @@
   font-weight: 500;
 }
 
-.header{
-  padding: 2rem
+.sectionHeader{
+  padding: 0.5rem 1rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.currentTable{
+  font-size: 1.3rem;
+  font-weight: 500;
+  min-width: 10rem;
+}
+
+.navBtns{
+  display: flex;
+  gap: 1rem;
+}
+
+.navBtn{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: none;
+  font-size: 1.5rem;
 }

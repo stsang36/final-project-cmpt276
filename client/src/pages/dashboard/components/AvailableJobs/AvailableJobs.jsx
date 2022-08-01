@@ -1,21 +1,14 @@
 import { useGetAvailableJobsQuery, useClaimJobMutation } from "redux/slices/jobSlice"
-import { downloadFile } from 'common/utils/fileServices'
 import style from './style.module.css'
 import moment from 'moment'
 import Button from 'common/components/Button'
 import { toast } from 'react-toastify'
 import { useEffect } from 'react'
-import { useSelector } from 'react-redux'
+import { calculateTimeLeft } from "common/utils/calculateTimeLeft"
 
 const AvailableJobs = () => {
   const { data, isError, error, refetch } = useGetAvailableJobsQuery()
   const [ claimJob, results ] = useClaimJobMutation()
-
-  const { token } = useSelector(state => state.auth)
-  const handledownload = (event, fileid) => {
-    event.preventDefault()
-    downloadFile(fileid, token)
-  }
 
   useEffect(()=>{
     const {isSuccess, isError, error, reset} = results
@@ -42,7 +35,7 @@ const AvailableJobs = () => {
         <h1 className={style.h1}>Available Jobs For You</h1>
         <Button 
           text='Refresh'
-          onClick={()=>refetch()} // does not work
+          onClick={refetch}
         />
       </header>
       <div className={style.jobs}>
@@ -53,36 +46,64 @@ const AvailableJobs = () => {
   return (
     <section className={style.section}>
       <header className={style.header}>
-        <h1 className={style.h1}>Available Jobs For You</h1>
+        <h1 className={style.h1}>Available Jobs For You ({data && data.length})</h1>
         <Button 
+          className={style.refreshBtn}
           text='Refresh'
+          onClick={refetch}
         />
       </header>
-      <div className={style.jobs}>
+      <section className={style.jobs}>
+        {data && data.length === 0 && (
+          <article 
+            className={style.jobCard}
+          >
+            No available jobs right now, please check back in later!
+          </article>
+        )}
         {data && data.map((job, index) => {
-          const deadline = moment(job.deadline).format('MMMM Do YYYY, h:mm a')
-          const timeLeft = moment(job.deadline).fromNow()
+          const deadline = moment(job.deadline)
+          const deadlineDate = deadline.format('MMM D, YYYY')
+          const deadlineTime = deadline.format('h:mma')
+          const timeLeft = calculateTimeLeft(moment(job.deadline))
           const createdAt = moment(job.created_at).fromNow()
           const { id } = job
           return(
-            <div 
+            <article 
               className={style.jobCard}
               key={index}
             >
-              <h1>Time Left: {timeLeft}</h1>
-              <div>Deadline: {deadline}</div>
-              <div>Created: {createdAt}</div>
-              <div>Owner: {job.owner_id}</div>
-              <button onClick={(e)=>handledownload(e, job.transcribe_fileid)}>Download File</button>
+              <ul className={style.jobInfo}>
+                <li className={style.jobName}>
+                  <p>Name:</p> 
+                  <p>{job.name}</p>
+                </li>
+                <li>
+                  <p>Time Left:</p>
+                  <p>{timeLeft ? timeLeft : 'Past Due'}</p>
+                </li>
+                <li>
+                  <p>Deadline Date:</p>
+                  <p>{deadlineDate}</p>
+                </li>
+                <li>
+                  <p>Deadline Time:</p>
+                  <p>{deadlineTime}</p>
+                </li>
+                <li>
+                  <p>Created:</p>
+                  <p>{createdAt}</p>
+                </li>
+              </ul>
               <Button
-                text='Claim Job'
-                className={style.btn}
-                onClick={()=>claimJob({id})} 
-              />
-            </div>
+                  text='Claim Job'
+                  className={style.claimBtn}
+                  onClick={()=>claimJob({id})} 
+                />
+            </article>
           )
         })}
-      </div>
+      </section>
     </section>
   )
 }

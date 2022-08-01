@@ -1,0 +1,45 @@
+.modal{
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.h1{
+  font-size: 1.7rem;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.p{
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.p .icon{
+  font-size: 2rem;
+}
+
+.btns{
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cancelBtn{
+  font-size: 1rem;
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+  background: lightgrey;
+}
+
+.uploadBtn{
+  font-size: 1rem;
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+  background: green;
+  color: white;
+}

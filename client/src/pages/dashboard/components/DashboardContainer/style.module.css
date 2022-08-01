@@ -1,9 +1,12 @@
-.dashboardContainer{
-  border: 3px solid blue;
+.main{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2rem;
+  gap: 2rem;
 }
 
 .h1{
   font-size: 2rem;
   font-weight: 500;
-  padding: 2rem;
 }

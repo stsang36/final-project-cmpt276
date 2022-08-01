@@ -1,7 +1,7 @@
 import style from './style.module.css'
 import Button from 'common/components/Button'
 import { useRef, useState, useEffect } from 'react'
-import { AiOutlineFile, AiOutlineCloudUpload } from 'react-icons/ai'
+import { AiOutlineCloudUpload } from 'react-icons/ai'
 import { IoClose } from 'react-icons/io5'
 import { formatBytes } from '../../../pages/create/utils/formatBytes'
 import { getFilesSize } from 'pages/create/utils/getFilesSize'
@@ -18,7 +18,15 @@ const generateAcceptedExtStr = (extensionsArray) => {
   return string
 }
 
-const FileInput = ({className, supportedExtensions, setSubmitFile, maxFiles, maxSize = 52428800, setDisableSubmit, status}) => {
+const FileInput = ({
+  className, 
+  supportedExtensions = ['pdf', 'doc', 'docx', 'pptx', 'rtf', 'zip', 'md', 'html', 'txt'],
+  setSubmitFile, 
+  maxFiles = 1, 
+  maxSize = 52428800, 
+  setDisableSubmit, 
+  status
+}) => {
   const inputFile = useRef(null)
   const [files, setFiles]= useState([])
   const [isDragOver, setIsDragOver] = useState(false)
@@ -104,8 +112,9 @@ const FileInput = ({className, supportedExtensions, setSubmitFile, maxFiles, max
     }
     if(files.length === maxFiles){
       toast.warn(`You have reached the maximum number of files: ${maxFiles}`)
-      return
+      // should not prevent file from being uploaded to parent component
     }
+
     if(getFilesSize(files) > maxSize){
       setDisableSubmit(true)
       toast.warn(`You have exceeded the maximum size of files: ${formatBytes(maxSize)}`)

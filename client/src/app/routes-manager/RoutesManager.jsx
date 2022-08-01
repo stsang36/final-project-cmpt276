@@ -11,6 +11,10 @@ import Layout from 'common/components/Layout'
 import AdminContainer from 'pages/admin/components/AdminContainer'
 import JobContainer from 'pages/job/components/JobContainer'
 import { AnimatePresence } from 'framer-motion'
+import SettingsContainer from 'pages/settings/SettingsContainer'
+import MyJobsContainer from 'pages/myJobs/components/MyJobsContainer'
+import UpdateJobModal from 'pages/job/components/UpdateJobModal'
+import RootPage from 'pages/RootPage'
 
 const RoutesManager = () => {
   const location = useLocation()
@@ -20,10 +24,13 @@ const RoutesManager = () => {
     <>
       <Routes location={background || location}>
         <Route element={<Layout />}>
-          <Route path='/dashboard' element={<HomeContainer />}/>
-          <Route path='/create' element={<CreateContainer />}/>
-          <Route path='/viewjob/:id' element={<JobContainer />}/>
-          <Route path='/admin' element={<AdminContainer />}/>
+          <Route path='/' element={<RootPage />}/>
+          <Route path='dashboard' element={<HomeContainer />}/>
+          <Route path='create' element={<CreateContainer />}/>
+          <Route path='viewjob/:id' element={<JobContainer />}/>
+          <Route path='admin' element={<AdminContainer />}/>
+          <Route path='settings' element={<SettingsContainer/>}/>
+          <Route path='myjobs' element={<MyJobsContainer />} />
         </Route>
         <Route path="auth" element={<AuthContainer />}>
           <Route path='login' element={<LoginCard />} />
@@ -40,6 +47,7 @@ const RoutesManager = () => {
         {background && (
           <Routes location={location} key={location.pathname}>
             <Route path="/viewjob/:id" element={<JobModal />}/>
+            <Route path="/updateJob/:id" element={<UpdateJobModal/>}/>
           </Routes>
         )}
       </AnimatePresence>

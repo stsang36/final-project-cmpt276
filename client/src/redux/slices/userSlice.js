@@ -43,17 +43,20 @@ export const userExtendedApiSlice = apiSlice.injectEndpoints({
     }),
     getAllUsers: builder.query({
       query: () => '/user',
+      providesTags: ['User']
     }),
     // settings
     getUserSettings: builder.query({
       query: () => '/user/settings',
+      providesTags: ['Settings']
     }),
     updateUserSettings: builder.mutation({
       query: (user) => ({
         url: '/user/settings',
         method: 'PUT',
         body: user,
-      })
+      }),
+      invalidatesTags: ['Settings']
     }),
     updatePassword: builder.mutation({
       query: ({newPassword, oldPassword}) => ({
@@ -68,13 +71,15 @@ export const userExtendedApiSlice = apiSlice.injectEndpoints({
         url: '/user/admin',
         method: 'PUT',
         body: {id, role: role.toLowerCase()}
-      })
+      }),
+      invalidatesTags: ['User']
     }),
     deleteUser: builder.mutation({
       query: ({id}) => ({
         url: `/user/admin/${id}`,
         method: "DELETE"
-      })
+      }),
+      invalidatesTags: ['User']
     }),
   })
 })

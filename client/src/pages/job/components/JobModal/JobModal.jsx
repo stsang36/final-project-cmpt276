@@ -30,10 +30,6 @@ const JobModal = () => {
   const [ dropJob, dropResults ] = useDropJobMutation()
   const { user: { role, id: userId } } = useSelector(state => state.auth)
 
-  const handleClaimJob = () => {
-    claimJob({id})
-  }
-
   const handleDropJob = () => {
     dropJob({id})
   }
@@ -205,14 +201,14 @@ const JobModal = () => {
                 </p>
                 <motion.button
                   className={style.fileBtn}
-                  onClick={()=>dispatch(downloadFile(data.transcribe_fileid.id))}
+                  onClick={()=>dispatch(downloadFile(data.review_fileid.id))}
                   disabled={!data.review_fileid || role === 'client'}
-                  custom={!data.review_fileid || role === 'reviewer'}
+                  custom={!data.review_fileid || role === 'client'}
                   variants={fileButtonVariants}
                   whileHover='hover'
                   whileTap='tap'
                 >
-                  {data.review_fileid && role !== 'client'(
+                  {data.review_fileid && role !== 'client' && (
                     <>
                       <FileIcon mimeType={data.review_fileid.type} className={style.fileIcon}/>
                       <p className={style.fileName}>{data.review_fileid.name}</p>
@@ -234,7 +230,7 @@ const JobModal = () => {
                 </p>
                 <motion.button
                   className={style.fileBtn}
-                  onClick={()=>dispatch(downloadFile(data.transcribe_fileid.id))}
+                  onClick={()=>dispatch(downloadFile(data.complete_fileid.id))}
                   disabled={!data.complete_fileid || role === 'transcriber'}
                   custom={!data.complete_fileid || role === 'reviewer'}
                   variants={fileButtonVariants}
@@ -258,19 +254,16 @@ const JobModal = () => {
               </li>
             </ul>
           </section>
-          {!data.claimed_userid && role !== 'client' && role !== 'admin' && (
-            <Button 
-              text='Claim Job'
-              className={style.claimBtn}
-              onClick={handleClaimJob}
-            />
-           )}
            {data.claimed_userid && data.claimed_userid.id === userId && (
-            <Button 
-              text='Drop Job'
-              className={style.dropBtn}
-              onClick={handleDropJob}
-            />
+            <ul className={style.jobBtns}>
+              <li>
+                <Button 
+                  text='Drop Job'
+                  className={style.dropBtn}
+                  onClick={handleDropJob}
+                />
+              </li>
+            </ul>
           )}
         </>
       )}
