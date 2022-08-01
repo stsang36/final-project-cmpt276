@@ -24,7 +24,7 @@ const AdminSettings = () => {
       setEditObj({
         id: data.id,
         reviewersChannelId: !data.reviewersChannelId ? '' : data.reviewersChannelId,
-        transcribersChannelId: data.transcribersChannelId ? '' : data.transcribersChannelId,
+        transcribersChannelId: !data.transcribersChannelId ? '' : data.transcribersChannelId,
         emailDomain: !data.emailDomain ? '' : data.emailDomain,
         toggleDiscordNotif: data.toggleDiscordNotif,
         toggleEmailNotif: data.toggleEmailNotif,
