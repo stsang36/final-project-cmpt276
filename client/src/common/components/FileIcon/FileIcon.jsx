@@ -28,7 +28,7 @@ const FileIcon = ({mimeType, className}) => {
   if(mimeType === 'application/zip'){
     return <BsFileEarmarkZipFill className={className}/>
   }
-  if(mimeType === 'text/markdown'){
+  if(mimeType === 'text/markdown' || mimeType === 'text/plain'){
     return <BsFileEarmarkTextFill className={className}/>
   }
   return <BsFileEarmarkFill className={className}/>

@@ -22,6 +22,7 @@ app.use(express.urlencoded({limit: '100mb', extended: true}))
 app.use('/api/user', require('./routes/userRoutes'))
 app.use('/api/file', require('./routes/fileRoutes'))
 app.use('/api/job', require('./routes/jobRoutes'))
+app.use('/api/config', require('./routes/configRoutes'))
 
 //  Serve Frontend
 if(process.env.NODE_ENV === 'production'){

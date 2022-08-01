@@ -7,7 +7,7 @@ export const fileButtonVariants = {
         cursor: 'pointer'
       }
     }
-    return
+    return {}
   },
   tap: disabled => {
     if(!disabled){
@@ -15,5 +15,6 @@ export const fileButtonVariants = {
         scale: 0.95
       }
     }
+    return {}
   }
 }

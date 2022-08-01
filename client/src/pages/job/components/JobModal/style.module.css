@@ -149,22 +149,28 @@
   justify-self: end;
 }
 
-.claimBtn{
+/* BOTTOM BUTTONS */
+.jobBtns{
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dropBtn,
+.uploadBtn{
+  padding: 1rem 2rem;
   font-size: 1.2rem;
-  align-self: center;
-  padding: 0.75rem 6rem;
-  background: green;
   border-radius: 7px;
   color: white;
-  font-family: inherit;
+  font-weight: 500;
 }
 
 .dropBtn{
-  font-size: 1.2rem;
-  align-self: center;
-  padding: 0.75rem 6rem;
   background: #CD5C5C;
-  border-radius: 7px;
-  color: white;
-  font-family: inherit;
+}
+
+.uploadBtn{
+  background: #fbca5b;
 }

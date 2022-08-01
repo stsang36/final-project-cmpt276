@@ -40,7 +40,7 @@ const CreateJobForm = () => {
     const { isSuccess, isError, error, reset } = results
     if(isSuccess){
       toast.success('Job created')
-      navigate('/')
+      navigate('/myjobs')
       return
     }
     if(isError){
@@ -57,7 +57,6 @@ const CreateJobForm = () => {
         setSubmitFile={setFile}
         status='transcribe'
         setDisableSubmit={setDisableSubmit}
-        supportedExtensions={['pdf', 'doc', 'docx', 'pptx', 'rtf', 'zip', 'md', 'html', 'txt']}
       />
       <label htmlFor='name' className={style.nameInput}>
         Job Name:

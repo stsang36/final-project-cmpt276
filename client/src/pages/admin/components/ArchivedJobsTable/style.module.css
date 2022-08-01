@@ -1,0 +1,120 @@
+.h1{
+  font-size: 1.3rem;
+  font-weight: 500;
+  align-self: flex-start;
+}
+
+.section{
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.section > table{
+  width: 100%;
+}
+
+/* JOB TABLE */
+.table{
+  font-family: inherit;
+  align-self: center;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+}
+
+.tableHeader{
+  background: green;
+  color: white;
+}
+
+.tableHeader th{
+  padding: 1rem 1.5rem;
+  font-weight: 800;
+  text-align: left;
+  font-size: 1rem;
+  width: 1px;
+  white-space: nowrap;
+}
+
+.tableRow{
+  background: white;
+}
+
+.tableRow:nth-of-type(even){
+  background: whitesmoke;
+}
+
+.tableRow td{
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+  text-align: left;
+  width: 1px;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.kebab{
+  vertical-align: middle;
+  font-size: 1.2rem;
+}
+
+.tableRow td:last-of-type{
+  text-align: right;
+}
+
+/* DELETE MODAL */
+
+.deleteModal{
+  display: grid;
+  padding: 2rem;
+  width: clamp(250px, 300px, 100%);
+  grid-template-rows: 2fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 1rem;
+  border-radius: 7px;
+  grid-template-areas: 
+    "icon icon"
+    "message message"
+    "button1 button2";
+}
+
+.alertIcon{
+  font-size: 4rem;
+  grid-area: icon;
+  justify-self: center;
+  align-self: center;
+}
+
+.deleteMessage{
+  grid-area: message;
+  font-size: 1.2rem;
+  justify-self: center;
+  text-align: center;
+}
+
+.cancelBtn{
+  grid-area: button1;
+  padding: 0.5rem;
+  justify-self: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+}
+
+.deleteBtn{
+  grid-area: button2;
+  background-color: crimson;
+  color: white;
+  justify-self: center;
+  padding: 0.5rem 2rem;
+  border-radius: 7px;
+}
+
+.dropdownLink .icon{
+  font-size: 1.3rem;
+}
+
+.dropdownBtn .icon{
+  font-size: 1.3rem;
+}

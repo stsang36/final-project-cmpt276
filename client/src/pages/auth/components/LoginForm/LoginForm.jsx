@@ -32,21 +32,22 @@ const LoginForm = () => {
     const { isSuccess, isError, error, reset } = results
     if(isSuccess){
       toast.success('Signed In Successfully')
-      const { role } = results.data
-      if(role === 'admin'){
-        navigate('/admin')
-        return
-      }
-      if(role === 'client'){
-        navigate('/create')
-        return
-      }
       navigate('/')
-    }
-    if(isError){
-      toast.error(`An error occured: ${error.data.message}`)
-      reset()
-      return
+    //   const { role } = results.data
+    //   if(role === 'admin'){
+    //     navigate('/admin')
+    //     return
+    //   }
+    //   if(role === 'client'){
+    //     navigate('/create')
+    //     return
+    //   }
+    //   navigate('/')
+    // }
+    // if(isError){
+    //   toast.error(`An error occured: ${error.message}`)
+    //   reset()
+    //   return
     } 
   },[results, navigate])
 

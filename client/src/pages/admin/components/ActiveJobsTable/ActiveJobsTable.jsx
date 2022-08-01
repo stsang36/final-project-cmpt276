@@ -3,28 +3,23 @@ import { GoKebabVertical } from 'react-icons/go'
 import Button from 'common/components/Button'
 import Dropdown from 'common/components/Dropdown'
 import { useGetAllActiveJobsQuery, useDeleteJobMutation } from 'redux/slices/jobSlice'
-import { downloadFile } from 'redux/slices/fileSlice'
-import { useDispatch } from 'react-redux'
 import style from './style.module.css'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import Modal from 'common/components/Modal'
 import { AnimatePresence } from 'framer-motion'
-import { AiFillAlert } from 'react-icons/ai'
-import JobModal from '../../../job/components/JobModal'
+import { AiTwotoneAlert, AiFillDelete } from 'react-icons/ai'
+import { GiExpand } from 'react-icons/gi'
 import { Link, useLocation } from 'react-router-dom'
-import { MdDeleteForever } from 'react-icons/md'
-import { CgExpand } from 'react-icons/cg'
+import JobStatus from 'common/components/JobStatus'
+import { calculateTimeLeft } from 'common/utils/calculateTimeLeft'
 
 const ActiveJobsTable = () => {
-  const dispatch = useDispatch()
   const location = useLocation()
   const {data} = useGetAllActiveJobsQuery()
   const [deleteJob, results] = useDeleteJobMutation()
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [isJobModalOpen, setIsJobModalOpen] = useState(false)
   const [focusedJob, setFocusedJob] = useState(null)
-
   
   const handleClickDelete = (event, job) => {
     setFocusedJob(job)
@@ -43,10 +38,6 @@ const ActiveJobsTable = () => {
     setIsDeleteModalOpen(false)
   }
 
-  const handleViewJob = (event, job) => {
-    setFocusedJob(job)
-    setIsJobModalOpen(true)
-  }
 
   useEffect(() => {
     const {isSuccess, isError, error, reset} = results
@@ -70,7 +61,7 @@ const ActiveJobsTable = () => {
             closeModal={()=>setIsDeleteModalOpen(false)}
             className={style.deleteModal}
           >
-            <AiFillAlert className={style.alertIcon}/>
+            <AiTwotoneAlert className={style.alertIcon}/>
             <p className={style.deleteMessage}>Are you sure you want to delete "{focusedJob.id}"?</p>
             <Button 
               className={style.cancelBtn}
@@ -85,76 +76,66 @@ const ActiveJobsTable = () => {
           </Modal>
         }
       </AnimatePresence>
-      <AnimatePresence>
-        {isJobModalOpen && 
-          <JobModal
-            closeModal={()=>{
-              setIsJobModalOpen(false)
-              setFocusedJob(null)
-            }}
-            job={focusedJob}
-          />
-        }
-      </AnimatePresence>
-      <header className={style.header}>
-        <h1 className={style.h1}>All Active Jobs</h1>
-      </header>
-      <div className={style.jobsTable}>
-        <header className={style.jobsHeader}>
-          <div>ID</div>
-          <div>Owner</div>
-          <div>Claimed User</div>
-          <div>Created</div>
-          <div>Deadline Date</div>
-          <div>Deadline Time</div>
-          <div>Time Left</div>
-          <div>Transcribe File</div>
-        </header>
-        <div className={style.jobs}>
+      <table className={style.table}>
+        <thead>
+          <tr className={style.tableHeader}>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Claimed</th>
+            <th>Created</th>
+            <th>Deadline Date</th>
+            <th>Deadline Time</th>
+            <th>Time Left</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
           {data && data.map((job, index) => {
+            const timeLeft = calculateTimeLeft(moment(job.deadline))
             const deadline = moment(job.deadline)
             const deadlineDate = deadline.format('MM/DD/YYYY')
-            const deadlineTime = deadline.format('h:mm a')
-            const created = moment(job.created_at).fromNow()
-            const timeLeft = moment(job.deadline).fromNow()
-            const fileid = job.transcribe_fileid
-            const claimed_user = job.claimed_userid ? job.claimed_userid : 'unclaimed'
+            const deadlineTime = deadline.format('hh:mma')
             return(
-              <div className={style.job}>
-                <div>{job.id}</div>
-                <div>{job.owner_id}</div>
-                <div>{claimed_user}</div>
-                <div>{created}</div>
-                <div>{deadlineDate}</div>
-                <div>{deadlineTime}</div>
-                <div>{timeLeft}</div>
-                <Button 
-                  text='download' 
-                  onClick={() => dispatch(downloadFile(fileid))}
-                />
-                <Dropdown>
-                  <GoKebabVertical className={style.kebab}/>
-                  <Link 
-                    className={style.dropdownLink}
-                    key={job.id}
-                    to={`/viewjob/${job.id}`}
-                    state={{ backgroundLocation: location }}
-                  >
-                    <CgExpand className={style.icon}/>
-                    View
-                  </Link>
-                  <button 
-                    className={style.dropdownBtn}
-                    onClick={(e)=>handleClickDelete(e, job)}>
-                    <MdDeleteForever className={style.icon}/>
-                    Delete
-                  </button>
-                </Dropdown>
-              </div>
+              <tr 
+                className={style.tableRow}
+                key={index}
+              >
+                <td>{job.id}</td>
+                <td>{job.name}</td>
+                <td className={style.jobStatus}>
+                  <JobStatus status={job.status}/>
+                </td>
+                <td>{job.claimed_userid ? 'Yes' : 'No'}</td>
+                <td>{moment(job.created_at).fromNow()}</td>
+                <td>{deadlineDate}</td>
+                <td>{deadlineTime}</td>
+                <td>{timeLeft ? timeLeft : 'Past Due'}</td>
+                <td>
+                  <Dropdown>
+                    <GoKebabVertical className={style.kebab}/>
+                    <Link 
+                      className={style.dropdownLink}
+                      key={job.id}
+                      to={`/viewjob/${job.id}`}
+                      state={{ backgroundLocation: location }}
+                    >
+                      <GiExpand className={style.icon}/>
+                      View
+                    </Link>
+                    <button 
+                      className={style.dropdownBtn}
+                      onClick={(e)=>handleClickDelete(e, job)}>
+                      <AiFillDelete className={style.icon}/>
+                      Delete
+                    </button>
+                  </Dropdown>
+                </td>
+              </tr>
             )
           })}
-        </div>
-      </div>
+        </tbody>
+      </table>
     </section>
   )
 }
