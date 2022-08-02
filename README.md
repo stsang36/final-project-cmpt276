@@ -55,6 +55,11 @@ LOCALE = en-CA
 
 TIMEZONE = Canada/Pacific
 
+## DATABASE SCHEMA
+To prepare your database, you will need to create a database and a table. In order to make this easy for you, we have created a database schema for you.
+
+It is located in database_schema folder. Import this file using PostgreSQL tools.
+
 # scripts to get started (development purposes only)
 #### npm i
 *~run this in the root folder to install all depenedencies for backend and client (must do this before running any other commands)*
