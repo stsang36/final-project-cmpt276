@@ -255,10 +255,6 @@ client.on('ready', async () => {
 })
 
 
-
-
-
-
 module.exports = { 
     client,
     sendToTranscribers,

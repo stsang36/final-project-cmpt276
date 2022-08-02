@@ -46,8 +46,8 @@ const updateAppConfig = async(req, res) => {
     text: 'UPDATE config set reviewers_channel_id = $1, transcribers_channel_id = $2, email_domain = $3, toggle_discord_notif = $4, toggle_email_notif = $5 WHERE id = $6',
     values: [reviewersChannelId, transcribersChannelId, emailDomain, toggleDiscordNotif, toggleEmailNotif, id]
   }
-  await refreshDiscordConfig()
   await pool.query(updateAppConfigQuery)
+  await refreshDiscordConfig()
   res.status(200).json({message: 'success'})
 }
 
