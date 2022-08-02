@@ -49,11 +49,7 @@ JWT_SECRET = (Your jwt secret)
 
 FRONTEND_URL = http://localhost:3000 (Your frontend url)
 
-NOREPLY_EMAIL = (Your no-reply email)
-
 DISCORD_TOKEN = (Your discord token)
-
-DISCORD_CHANNEL_ID = (Your discord channel id)
 
 LOCALE = en-CA
 

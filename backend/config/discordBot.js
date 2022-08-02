@@ -108,6 +108,14 @@ const sendToReviewers = async (message) => {
 
 const sendToPM = async (discordId, message) => {
 
+    if (!config) {
+        await fetchConfig()
+    }
+
+    if (!config.toggleNotification) {
+        return;
+    }
+
     if (client.user && discordId) {
         const user = await client.users.fetch(discordId)
         if (user) {
@@ -134,6 +142,86 @@ const sendToPM = async (discordId, message) => {
     }
 }
 
+const updatePresence = async() => {
+
+    if (!config) {
+        await fetchConfig()
+    }
+
+    if (config.toggleNotification) {
+
+        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL) ', ['transcribe', 'review'])
+        // count nulls for transcribe and reviewer ids
+        const openJobs = result.rows.length
+
+        client.user.presence.set({
+            activities: [{name: `${openJobs} Jobs Available`}],
+            status: 'online'
+        });
+    } else {
+        client.user.presence.set({
+            activities: [{name: 'Notifications Disabled'}],
+            status: 'dnd'
+        });
+    }
+
+} 
+
+const updateHeader = async() => {
+
+    if (!config) {
+        await fetchConfig()
+    }
+
+    if (!config.toggleNotification) {
+        console.log('Notification is disabled, ignoring updating the header...')
+        return;
+    }
+        
+    if (config && client.user) {
+        let reviewChannel = null
+        let transcribeChannel = null
+        
+        if (config.review_channel_id) {
+            reviewChannel = await client.channels.fetch(config.review_channel_id)
+        }
+
+        if (config.transcribe_channel_id) {
+            transcribeChannel = await client.channels.fetch(config.transcribe_channel_id)
+        }
+        
+        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL)', ['transcribe', 'review'])
+
+        if (reviewChannel) {
+        
+            const reviewerJobs = result.rows.filter(row => row.status === 'review').length
+            
+            try {
+                await reviewChannel.setTopic(` ${reviewerJobs} Review Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
+                
+            } catch (error) {
+                throw new Error(error)
+            }
+        } else {
+            console.log('Reviewer channel not found, ignoring updating the channel topic...')
+        }
+
+        if (transcribeChannel) {
+            const transcriberJobs = result.rows.filter(row => row.status === 'transcribe').length
+            
+            try {
+                await transcribeChannel.setTopic(`${transcriberJobs} Transcribe Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
+                
+            } catch (error) {
+                throw new Error(error)
+            }
+        } else {
+            console.log('Transcriber channel not found, ignoring updating the channel topic...')
+        }
+        
+    }
+}
+
 client.on('messageCreate', async (message) => {
 
     if (message.author.bot) {
@@ -155,73 +243,7 @@ client.on('messageCreate', async (message) => {
 client.on('ready', async () => {
     console.log(`Discord: Logged in as ${client.user.tag}!`)
 
-    const updatePresence = async() => {
-
-        const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL) ', ['transcribe', 'review'])
-        // count nulls for transcribe and reviewer ids
-        const openJobs = result.rows.length
-
-        client.user.presence.set({
-            activities: [{name: `${openJobs} Jobs Available`}],
-            status: 'online'
-        });
-    } 
-
-    const updateHeader = async() => {
-
-        if (!config) {
-            await fetchConfig()
-        }
-
-        if (!config.toggleNotification) {
-            console.log('Notification is disabled, ignoring updating the header...')
-            return;
-        }
-            
-        if (config && client.user) {
-            let reviewChannel = null
-            let transcribeChannel = null
-            
-            if (config.review_channel_id) {
-                reviewChannel = await client.channels.fetch(config.review_channel_id)
-            }
-
-            if (config.transcribe_channel_id) {
-                transcribeChannel = await client.channels.fetch(config.transcribe_channel_id)
-            }
-            
-            const result = await pool.query('SELECT * FROM \"job\" WHERE (status = $1 OR status = $2) AND (active = true) AND (claimed_userid IS NULL)', ['transcribe', 'review'])
-
-            if (reviewChannel) {
-            
-                const reviewerJobs = result.rows.filter(row => row.status === 'review').length
-                
-                try {
-                    await reviewChannel.setTopic(` ${reviewerJobs} Review Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
-                    
-                } catch (error) {
-                    throw new Error(error)
-                }
-            } else {
-                console.log('Reviewer channel not found, ignoring updating the channel topic...')
-            }
-
-            if (transcribeChannel) {
-                const transcriberJobs = result.rows.filter(row => row.status === 'transcribe').length
-                
-                try {
-                    await transcribeChannel.setTopic(`${transcriberJobs} Transcribe Jobs Available | Updated ${new Date().toLocaleString(process.env.LOCALE, {timeZone: process.env.TIMEZONE})} ${process.env.TIMEZONE}`)
-                    
-                } catch (error) {
-                    throw new Error(error)
-                }
-            } else {
-                console.log('Transcriber channel not found, ignoring updating the channel topic...')
-            }
-            
-        }
-    }
-
+    
     await updatePresence()
     await updateHeader()
 
@@ -241,7 +263,8 @@ module.exports = {
     client,
     sendToTranscribers,
     sendToReviewers,
-    sendToPM
+    sendToPM,
+    fetchConfig
 } 
 
 

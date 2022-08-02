@@ -38,6 +38,11 @@ const {
     updateJobCheck
 } = require('./tests/jobTest')
 
+const {
+    getConfigCheck,
+    updateAppConfigCheck
+} = require('./tests/configTest')
+
 // keeps track of the created admin and transcriber account
 let adminCreated = false
 let adminID = null
@@ -156,6 +161,11 @@ describe('Job system:', () => {
     it('should update a job on PUT /api/job/update/:id', updateJobCheck)
     it('should delete a job on DELETE /api/job/admin/delete/:id', deleteJobCheck);
 });
+
+describe('Config System:', () => {
+    it('should get all configs on GET /api/config', getConfigCheck)
+    it('should update config on PUT /api/config', updateAppConfigCheck)
+})
 
 after( async () => {
 
