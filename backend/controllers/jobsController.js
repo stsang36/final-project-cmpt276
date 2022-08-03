@@ -136,7 +136,7 @@ const deletejob = async (req,res) => {
     values: [jobId]
   }
   await pool.query(deleteJobQuery)
-  const { transcribe_fileid, review_fileid, complete_fileid, owner_id, transcriber_id, reviewer_id } = selectJobResult.rows[0]
+  const { transcribe_fileid, review_fileid, complete_fileid, owner_id, claimed_userid } = selectJobResult.rows[0]
   const deleteFilesQuery = {
     text: "DELETE FROM file where id IN ($1, $2, $3)",
     values: [transcribe_fileid, review_fileid, complete_fileid]
@@ -172,39 +172,12 @@ const deletejob = async (req,res) => {
     }
   }
 
-  if (transcriber_id) {
-    const transcriber = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [transcriber_id])
-    const transcriberDiscordNotify = transcriber.rows[0].togglediscordpm
+  if (claimed_userid) {
+    const calimedUser = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [claimed_userid])
+    const claimedDiscordNotify = calimedUser.rows[0].togglediscordpm
 
-    if (transcriberDiscordNotify) {
-      const transcriberDiscordId = transcriber.rows[0].discordid
-
-      const deleteJobMessagePM = {
-        title: `Your current job has been deleted by "${req.user.username}".`,
-        description: `Your current job has been deleted by an administrator.\nPlease contact the administrator if you have any questions.`,
-        color: 0xDC143C,
-        fields: [{
-            name: 'Name:',
-            value: `${jobName}`,
-            inline: true
-        },{
-            name: "Job ID",
-            value: jobId,
-            inline: true
-        }]
-      }
-      try {
-        await sendToPM(transcriberDiscordId, deleteJobMessagePM)
-      } catch (err) {
-        console.log(err)
-      }
-    }
-  } else if (reviewer_id) {
-    const reviewer = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [reviewer_id])
-    const reviewerDiscordNotify = reviewer.rows[0].togglediscordpm
-    
-    if (reviewerDiscordNotify) {
-      const reviewerDiscordId = reviewer.rows[0].discordid
+    if (claimedDiscordNotify) {
+      const claimedDiscordId = calimedUser.rows[0].discordid
 
       const deleteJobMessagePM = {
         title: `Your current job has been deleted by "${req.user.username}".`,
@@ -221,7 +194,7 @@ const deletejob = async (req,res) => {
         }]
       }
       try {
-        await sendToPM(reviewerDiscordId, deleteJobMessagePM)
+        await sendToPM(claimedDiscordId, deleteJobMessagePM)
       } catch (err) {
         console.log(err)
       }
@@ -424,6 +397,11 @@ const updateJob = async(req, res) => {
 
     if(newStatus === 'complete') {
 
+      const result = await pool.query ('SELECT transcriber_id FROM \"user\" WHERE id = $1', [jobId])
+      const transcriberId = result.rows[0].transcriber_id
+      const transcriber = await pool.query ('SELECT username FROM \"user\" WHERE id = $1', [transcriberId])
+      const transcriberUsername = transcriber.rows[0].username
+
       const completeJobMessagePM = {
         title: `Your job has been completed.`,
         description: `Your job has been completed.\nYou can download the file from the website.`,
@@ -440,8 +418,13 @@ const updateJob = async(req, res) => {
           name: 'Filename:',
           value: `${file.name}`
         },{
+          name: 'Transcriber:',
+          value: `${transcriberUsername}`,
+          inline: true
+        }, {
           name: 'Reviewer:',
-          value: `${username}`
+          value: `${username}`,
+          inline: true
         }]
       }
 
