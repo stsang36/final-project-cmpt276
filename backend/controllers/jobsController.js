@@ -104,7 +104,6 @@ const getPastJobs = async(req, res) => {
     text: `SELECT * from job where ${role}_id = $1 ORDER BY "deadline" DESC limit 20`,
     values: [id]
   }
-  console.log(getPastJobsQuery.text)
   const result = await pool.query(getPastJobsQuery)
   res.status(200).json(result.rows)
 }
@@ -137,7 +136,7 @@ const deletejob = async (req,res) => {
     values: [jobId]
   }
   await pool.query(deleteJobQuery)
-  const { transcribe_fileid, review_fileid, complete_fileid, owner_id, name } = selectJobResult.rows[0]
+  const { transcribe_fileid, review_fileid, complete_fileid, owner_id, transcriber_id, reviewer_id } = selectJobResult.rows[0]
   const deleteFilesQuery = {
     text: "DELETE FROM file where id IN ($1, $2, $3)",
     values: [transcribe_fileid, review_fileid, complete_fileid]
@@ -166,12 +165,15 @@ const deletejob = async (req,res) => {
           inline: true
         }]
     }
-
-    await sendToPM(discordId, deleteJobMessagePM)
+    try {
+      await sendToPM(discordId, deleteJobMessagePM)
+    } catch (err) {
+      console.log(err)
+    }
   }
 
-  if (selectJobResult.rows[0].transcriber_id) {
-    const transcriber = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [selectJobResult.rows[0].transcriber_id])
+  if (transcriber_id) {
+    const transcriber = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [transcriber_id])
     const transcriberDiscordNotify = transcriber.rows[0].togglediscordpm
 
     if (transcriberDiscordNotify) {
@@ -191,10 +193,14 @@ const deletejob = async (req,res) => {
             inline: true
         }]
       }
-      await sendToPM(transcriberDiscordId, deleteJobMessagePM)
+      try {
+        await sendToPM(transcriberDiscordId, deleteJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
     }
-  } else if (selectJobResult.rows[0].reviewer_id) {
-    const reviewer = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [selectJobResult.rows[0].reviewer_id])
+  } else if (reviewer_id) {
+    const reviewer = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [reviewer_id])
     const reviewerDiscordNotify = reviewer.rows[0].togglediscordpm
     
     if (reviewerDiscordNotify) {
@@ -214,7 +220,11 @@ const deletejob = async (req,res) => {
             inline: true
         }]
       }
-      await sendToPM(reviewerDiscordId, deleteJobMessagePM) 
+      try {
+        await sendToPM(reviewerDiscordId, deleteJobMessagePM)
+      } catch (err) {
+        console.log(err)
+      }
     }
   }
 
@@ -233,8 +243,13 @@ const deletejob = async (req,res) => {
       }]
     }
 
-  await sendToTranscribers(deleteJobMesssageChannel)
-  await sendToReviewers(deleteJobMesssageChannel)
+  try {
+    await sendToTranscribers(deleteJobMesssageChannel)
+    await sendToReviewers(deleteJobMesssageChannel)
+  } catch (error) {
+    console.log(error)
+  }
+
   res.status(200).json({message:`job ${jobId} deleted`})
 }
 

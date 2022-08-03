@@ -103,8 +103,8 @@ before( () => {
         pool.query(checkTranscriberQuery).then((checkTranscriber) => {
             if (checkTranscriber.rowCount === 0) {
                 const transcriberInsertQuery = {
-                    text: 'INSERT into \"user\" (username, password, email, role, togglediscordpm, toggleemailnotification) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-                    values: ['transcriber', '$2a$10$vD/cn.a1hxPEr75PemL/FOHLDEqUfdD3scq5dEZZ4zl5qY0fUP7vi','transcriber@poggers.com', 'transcriber', false, true]
+                    text: 'INSERT into \"user\" (username, password, email, role, togglediscordpm, toggleemailnotification, discordid) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+                    values: ['transcriber', '$2a$10$vD/cn.a1hxPEr75PemL/FOHLDEqUfdD3scq5dEZZ4zl5qY0fUP7vi','transcriber@poggers.com', 'transcriber', true, true, '146787205606539264']
                 }
                 pool.query(transcriberInsertQuery).then( (result) => {
                         transcriberID = result.rows[0].id
