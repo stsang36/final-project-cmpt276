@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useRegisterMutation } from 'redux/slices/userSlice'
 import { toast } from 'react-toastify'
+import isEmail from 'validator/lib/isEmail'
 
 const RegisterForm = () => {
   const navigate = useNavigate()
@@ -24,6 +25,10 @@ const RegisterForm = () => {
     event.preventDefault()
     if(!username || !email || !password || !confirmPassword){
       toast.warn('Please fill in all required fields')
+      return
+    }
+    if(!isEmail(email)){
+      toast.warn('incorrect email format')
       return
     }
     if(password !== confirmPassword){
@@ -61,7 +66,7 @@ const RegisterForm = () => {
         <input
           aria-required='true'
           className={style.input}
-          type="text" 
+          type="email" 
           placeholder='Email'
           value={email}
           onChange={(event) => setEmail(event.target.value)}

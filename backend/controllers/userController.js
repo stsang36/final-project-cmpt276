@@ -118,6 +118,10 @@ const updateUserSettings = async(req, res) => {
     throw new Error('Unauthorized Access')
   }
   const { id, username, email, discordId, toggleDiscordPm, toggleEmailNotification } = req.body
+  if(!username){
+    res.status(400)
+    throw new Error('Username cannot be left blank')
+  }
   const duplicateUsername = await pool.query('SELECT * from \"user\" WHERE username = $1 AND id != $2 limit 1', [username.toLowerCase(), id])
   if(duplicateUsername.rows[0]){
     res.status(400)
@@ -146,6 +150,10 @@ const updateUserSettings = async(req, res) => {
 const updateUserPassword = async(req, res) => {
   const { id } = req.user
   const { newPassword, oldPassword } = req.body
+  if(!newPassword || !oldPassword){
+    res.status(400)
+    throw new Error("Missing fields")
+  }
   const results = await pool.query('SELECT * FROM \"user\" WHERE id = $1 limit 1', [id])
   const user = results.rows[0]
   if(user && (await bcrypt.compare(oldPassword, user.password))){
@@ -251,6 +259,9 @@ const resetPassword = async(req, res) => {
   const { token, password } = req.body
   if(!token){
     throw new Error('unauthorized access')
+  }
+  if(!password){
+    throw new Error('missing password')
   }
   const { id, password: oldPassword } = jwt.verify(token, process.env.JWT_SECRET)
   const results = await pool.query('SELECT * from \"user\" WHERE id = $1 LIMIT 1', [id])

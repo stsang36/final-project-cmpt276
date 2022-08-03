@@ -1,7 +1,7 @@
 import style from './style.module.css'
 import { motion } from 'framer-motion'
 
-const Button = ({text, onClick, className, disabled}) => 
+const Button = ({text, onClick, className, disabled, onKeyPress, tabIndex}) => 
 {
   return (
     <motion.button 
@@ -9,6 +9,8 @@ const Button = ({text, onClick, className, disabled}) =>
       className={`${style.button} ${className}`}
       onClick={onClick}
       disabled={disabled}
+      onKeyPress={onKeyPress}
+      tabIndex={tabIndex}
     >
       {text}
     </motion.button>

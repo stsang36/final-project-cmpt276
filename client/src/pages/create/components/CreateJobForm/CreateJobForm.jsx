@@ -53,16 +53,22 @@ const CreateJobForm = () => {
     <form className={style.form}>
       <h1 className={style.h1}>Job Form</h1>
       <FileInput 
-        maxFiles={3}
+        maxFiles={1}
         setSubmitFile={setFile}
         status='transcribe'
         setDisableSubmit={setDisableSubmit}
       />
-      <label htmlFor='name' className={style.nameInput}>
+      <label
+        htmlFor='name' 
+        className={style.nameInput}
+      >
         Job Name:
         <input
           type='text'
-          onChange={(e)=>setName(e.target.value)}
+          onChange={(e)=>{
+            e.preventDefault()
+            setName(e.target.value)
+          }}
           placeholder='Enter a name here'
         />
       </label>

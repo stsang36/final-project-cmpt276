@@ -101,9 +101,10 @@ const getPastJobs = async(req, res) => {
   }
   const { id } = req.user
   const getPastJobsQuery = {
-    text: `SELECT * from job where ${role}_id = $1 AND claimed_userid != $1 ORDER BY "deadline" DESC limit 20`,
+    text: `SELECT * from job where ${role}_id = $1 ORDER BY "deadline" DESC limit 20`,
     values: [id]
   }
+  console.log(getPastJobsQuery.text)
   const result = await pool.query(getPastJobsQuery)
   res.status(200).json(result.rows)
 }
@@ -771,23 +772,12 @@ const getJob = async(req, res) => {
   job.owner_id = ownerQueryResults.rows[0]
   job.claimed_userid = claimedUserResults.rows[0] ? claimedUserResults.rows[0] : null
 
-  if(role === 'admin' || job.owner_id.id === id){
+  if(role === 'admin' || job.owner_id.id === id || job.transcriber_id === id || job.reviewer_id === id || job.claimed_userid.id === id){
     res.status(200).json(job)
     return
   }
-
-  //  users can only access if the status allows AND is unclaimed
-  const claimableRole = job.status === 'transcribe' ? 'transcriber' : 'reviewer'
-  if(role === 'client' || job.status === 'complete' || claimableRole !== role){
-    res.status(401)
-    throw new Error('unauthorized access')
-  }
-
-  if(job.claimed_userid && job.claimed_userid.id !== id){
-    res.status(400)
-    throw new Error('job has already been claimed')
-  }
-  res.status(200).json(job)
+  res.status(401)
+  throw new Error('unauthorized access')
 }
 
 module.exports = { 

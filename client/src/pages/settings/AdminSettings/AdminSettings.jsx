@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import Button from 'common/components/Button'
 import { toast } from 'react-toastify'
 import ChangePassword from '../ChangePassword'
+import isEmail from 'validator/lib/isEmail'
 
 const AdminSettings = () => {
   const { data } = useGetAppConfigQuery()
@@ -15,7 +16,11 @@ const AdminSettings = () => {
 
   const handleSaveChanges = (event) => {
     event.preventDefault()
-    update(editObj)
+    if(!editObj.emailDomain || isEmail(editObj.emailDomain)){
+      update(editObj)
+      return
+    }
+    toast.warn('Incorrect Email Format')
   }
 
   const handleToggleEdit = (event) => {
@@ -88,7 +93,7 @@ const AdminSettings = () => {
               value={editObj.reviewersChannelId} 
               disabled={!edit}
               onChange={handleInputChange}
-              type='text'
+              type='number'
             />
           </label>
           <label className={style.label}>
@@ -98,7 +103,7 @@ const AdminSettings = () => {
               value={editObj.transcribersChannelId} 
               disabled={!edit}
               onChange={handleInputChange}
-              type='text'
+              type='number'
             />
           </label>
           <label className={style.label}>

@@ -84,6 +84,7 @@ const FileInput = ({
 
   const onButtonClick = (e) => {
     e.preventDefault()
+    e.stopPropagation()
     inputFile.current.click()
   }
 
@@ -145,14 +146,18 @@ const FileInput = ({
 
   return (
     <>
-      <input 
-        ref={inputFile}
-        type='file' 
+      <label
         className={style.hide}
-        accept={generateAcceptedExtStr(supportedExtensions)}
-        onChange={handleChange}
-        multiple={maxFiles > 1}
-      />
+      >
+        Select file{maxFiles > 1 ? 's': ''} for upload
+        <input 
+          ref={inputFile}
+          type='file' 
+          accept={generateAcceptedExtStr(supportedExtensions)}
+          onChange={handleChange}
+          multiple={maxFiles > 1}
+        />
+      </label>
       <div 
         aria-hidden={true}
         className={`${style.fileInput} ${className}`}
@@ -196,7 +201,7 @@ const FileInput = ({
           onClick={onButtonClick}
           disabled={files.length >= maxFiles || getFilesSize(files) >= maxSize}
         />
-      </div>
+        </div>
     </>
   )
 }

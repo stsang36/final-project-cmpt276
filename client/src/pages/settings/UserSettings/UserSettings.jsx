@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import Button from 'common/components/Button'
 import ChangePassword from '../ChangePassword'
-
-
+import isEmail from 'validator/lib/isEmail';
 
 const UserSettings = () => {
   const { data } = useGetUserSettingsQuery()
@@ -16,7 +15,11 @@ const UserSettings = () => {
 
   const handleSaveChanges = (event) => {
     event.preventDefault()
-    updateSettings(editObj)
+    if(!editObj.email || isEmail(editObj.email)){
+      updateSettings(editObj)
+      return
+    }
+    toast.warn('Incorrect Email format')
   }
 
   const handleToggleEdit = (event) => {
@@ -109,7 +112,7 @@ const UserSettings = () => {
               value={editObj.discordId} 
               disabled={!edit}
               onChange={handleInputChange}
-              type='text'
+              type='number'
             />
           </label>
           <label className={style.label}>
