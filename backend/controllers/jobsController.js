@@ -410,9 +410,24 @@ const updateJob = async(req, res) => {
     if(newStatus === 'complete') {
 
       const completeJobMessagePM = {
-        title: `Your job has been completed by "${username}".`,
-        description: `Your job with ID: ${jobId} "${file.name}" has been completed.\nYou can download the file from the website.`,
-        color: 0x57F287
+        title: `Your job has been completed.`,
+        description: `Your job has been completed.\nYou can download the file from the website.`,
+        color: 0x57F287,
+        fields: [{
+          name: 'Name:',
+          value: `${jobName}`,
+          inline: true
+        },{
+          name: 'Job Id:',
+          value: `${jobId}`,
+          inline: true
+        },{
+          name: 'Filename:',
+          value: `${file.name}`
+        },{
+          name: 'Reviewer:',
+          value: `${username}`
+        }]
       }
 
       await sendToPM(discordId, completeJobMessagePM)
@@ -432,7 +447,7 @@ const updateJob = async(req, res) => {
           value: `${jobId}`,
           inline: true
         }, {
-          name: `Worker:`,
+          name: `Transcriber:`,
           value: `${username}`
         }, {
           name: 'Status:',
@@ -574,7 +589,7 @@ const claimJob = async(req, res) => {
     if (discordNotify) {
       const discordId = owner.rows[0].discordid
       const claimJobMessagePM = {
-        title: `${username} has Claimed your Job.`,
+        title: `${username} has claimed your Job.`,
         description: `Your job has been claimed by ${username}.\nPlease contact the ${username} if you have any questions.`,
         color: 0x0099FF,
         fields: [{
