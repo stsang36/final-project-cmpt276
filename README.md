@@ -55,6 +55,8 @@ LOCALE = en-CA
 
 TIMEZONE = Canada/Pacific
 
+NO_EMPLOYEE_EMAIL = true (remove this if you want to send emails to ALL employees about job alerts)
+
 ## DATABASE SCHEMA
 To prepare your database, you will need to create a database and a table. In order to make this easy for you, we have created a database schema for you.
 

@@ -2,6 +2,7 @@ const discord = require('discord.js')
 const dotenv = require('dotenv')
 dotenv.config({path: '../.env'})
 const { pool } = require('./pool.js')
+
 const { GatewayIntentBits, Partials } = require('discord.js')
 
 require('express-async-errors')

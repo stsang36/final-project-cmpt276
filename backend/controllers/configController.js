@@ -1,5 +1,6 @@
 const { pool } = require('../config/pool')
 const { fetchConfig:refreshDiscordConfig } = require('../config/discordBot')
+const { fetchConfig:refreshMailConfig } = require('../config/mail')
 require('express-async-errors')
 
 
@@ -48,6 +49,7 @@ const updateAppConfig = async(req, res) => {
   }
   await pool.query(updateAppConfigQuery)
   await refreshDiscordConfig()
+  await refreshMailConfig()
   res.status(200).json({message: 'success'})
 }
 

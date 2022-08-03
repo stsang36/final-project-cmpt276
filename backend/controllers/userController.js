@@ -1,7 +1,7 @@
 const { pool } = require('../config/pool.js')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const sendEmail = require('../config/mail')
+const { sendEmail } = require('../config/mail')
 
 
 // @route:  GET /api/user/
@@ -222,21 +222,24 @@ const forgotPassword = async(req, res) => {
     res.status(400)
     throw new Error('user not found')
   }
-  const { id, email, password } = results.rows[0]
+  const { id, email, password, username } = results.rows[0]
   const token = jwt.sign({id: id, password: password}, process.env.JWT_SECRET, {expiresIn: "3h"})
-  const msg = {
-    to: email, // change to email
-    from: process.env.NOREPLY_EMAIL,
-    subject: "Bytetools Password Reset",
-    html: `<h1>Bytetools Account Password Reset</h1><p>To reset password for ${email}, please click on the Reset Link: <a href="${process.env.FRONTEND_URL}/auth/passwordreset/${token}">RESET LINK</a></p><p>If you did not request a password reset, please ignore this email.</p>`
-  }
+  
+  const resetPasswordMsg = {
+    to_email: email,
+    templateId: 'd-216ba4365563435893c689a4b38123cf',
+    subject: "Password Reset Request",
+    username: username,
+    targetLink: `${process.env.FRONTEND_URL}/auth/passwordreset/${token}`
+    }
 
-  try {
-    sendEmail(msg)
-  } catch(err) {
-    res.status(400)
-    throw new Error('Email failed to send')
-  } 
+    try {
+      await sendEmail(resetPasswordMsg)
+    } catch(err) {
+      res.status(400)
+      throw new Error('Email failed to send')
+    } 
+
   res.status(200).json({message: 'success'})
 }
 

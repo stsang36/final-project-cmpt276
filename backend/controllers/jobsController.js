@@ -1,5 +1,8 @@
 const { pool } = require('../config/pool.js')
 const {sendToReviewers, sendToTranscribers, sendToPM } = require('../config/discordBot.js')
+const { sendEmail } = require('../config/mail.js')
+const dotenv = require('dotenv')
+dotenv.config({path: '../.env'})
 require('express-async-errors')
 
 //
@@ -291,7 +294,35 @@ const addJob = async(req, res) => {
     }]
   }
 
-  await sendToTranscribers(newJobMessage)
+  try {
+    await sendToTranscribers(newJobMessage)
+  } catch (err) {
+    console.log(err)
+  }
+
+  // email notification to transcriber
+  if (!process.env.NO_EMPLOYEE_EMAIL) {
+    const result = await pool.query('SELECT * FROM \"user\" WHERE role = $1', ['transcriber'])
+    const transcribers = result.rows
+
+    transcribers.forEach(async (aTranscriber) => {
+      if (aTranscriber.toggleemailnotification) {
+        const newJobEmail = {
+          to_email: aTranscriber.email,
+          templateId: 'd-0a4f7d3883174feba09d749c17e2748c',
+          subject: "A job needs to be transcribed",
+          username: aTranscriber.username,
+          targetLink: process.env.FRONTEND_URL
+        }
+        try {
+          await sendEmail(newJobEmail)
+        } catch(err){
+          console.log(err)
+        }
+      }
+    })
+  }
+
 
   res.status(200).json({
     message: 'job has been posted', 
@@ -360,6 +391,8 @@ const updateJob = async(req, res) => {
     values: [newFileId, id, newStatus, newActive, jobId]
   }
   const updateQueryResult = await pool.query(updateJobQuery)
+
+ 
 
   //discord notification
   let jobName = updateQueryResult.rows[0].name
@@ -443,6 +476,50 @@ const updateJob = async(req, res) => {
         console.log(err)
       }
     }
+  }
+
+  //email notification to client completion of job
+
+  const ownerEmail = owner.rows[0].email
+
+  if (newStatus === 'complete') {
+    const completeJobMessage = {
+      to_email: ownerEmail,
+      templateId: 'd-fb0a469c70df47d6b97b2cb419205dc8',
+      subject: "Your job has been completed",
+      username: owner.rows[0].username,
+      targetLink: process.env.FRONTEND_URL
+      }
+      
+      try {
+        await sendEmail(completeJobMessage)
+      } catch(err){
+        console.log(err)
+      }
+
+  }
+
+  if (newStatus === 'review' && !process.env.NO_EMPLOYEE_EMAIL) {
+    // get all reviewers
+    const result = await pool.query('SELECT * FROM \"user\" WHERE role = $1', ['reviewer'])
+    const reviewers = result.rows
+
+    reviewers.forEach(async (aReviewer) => {
+      if (aReviewer.toggleemailnotification) {
+        const reviewStatusMessage = {
+          to_email: aReviewer.email,
+          templateId: 'd-0a4f7d3883174feba09d749c17e2748c',
+          subject: "A job needs to be reviewed",
+          username: aReviewer.username,
+          targetLink: process.env.FRONTEND_URL
+        }
+        try {
+          await sendEmail(reviewStatusMessage)
+        } catch(err){
+          console.log(err)
+        }
+      }
+    })
   }
 
   res.status(200).json({message: 'success'})
