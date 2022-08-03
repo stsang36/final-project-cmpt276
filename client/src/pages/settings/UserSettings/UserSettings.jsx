@@ -58,7 +58,7 @@ const UserSettings = () => {
       return
     }
     if(isError){
-      toast.error(`An error occured: ${error.message}`)
+      toast.error(`An error occured: ${error.data.message}`)
       reset()
       return
     }

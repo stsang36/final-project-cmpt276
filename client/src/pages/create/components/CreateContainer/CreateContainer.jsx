@@ -1,9 +1,14 @@
 import style from './style.module.css'
-import Layout from 'common/components/Layout'
 import Protect from 'common/components/Protect'
 import CreateJobForm from '../CreateJobForm'
+import { useEffect } from 'react'
 
-const createContainer = () => {
+const CreateContainer = () => {
+  useEffect(() => {
+    document.title = 'Bytetools | Create a Job'
+    return () => document.title = 'Bytetools'
+  },[])
+
   return (
     <Protect>
       <main className={style.createContainer}>
@@ -16,4 +21,4 @@ const createContainer = () => {
   )
 }
 
-export default createContainer
+export default CreateContainer

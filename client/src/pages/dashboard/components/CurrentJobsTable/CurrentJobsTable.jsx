@@ -16,8 +16,9 @@ const CurrentJobsTable = () => {
 
   return (
     <section className={style.section}> 
-      <header>
+      <header className={style.header}>
         <h1 className={style.h1}>Your Current Jobs</h1>
+        <p className={style.p}>~ jobs you have claimed will be found here</p>
       </header>
       <table className={style.table}>
         <thead>

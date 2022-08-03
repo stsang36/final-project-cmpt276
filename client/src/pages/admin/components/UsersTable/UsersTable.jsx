@@ -66,7 +66,7 @@ const UsersTable = () => {
       return
     }
     if(isError){
-      toast.error(`An error occured: ${error}`)
+      toast.error(`${error.data.message}`)
       reset()
       return
     }

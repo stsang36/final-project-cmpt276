@@ -6,9 +6,9 @@
   align-items: center;
   width: clamp(400px, 500px, 100%);
   background: white;
-  padding: 2rem;
+  padding: 2rem 3rem;
   gap: 2rem;
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.4);
   border-radius: 7px;
 }
 

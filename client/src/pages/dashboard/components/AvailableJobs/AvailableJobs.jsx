@@ -7,17 +7,18 @@ import { useEffect } from 'react'
 import { calculateTimeLeft } from "common/utils/calculateTimeLeft"
 
 const AvailableJobs = () => {
-  const { data, isError, error, refetch } = useGetAvailableJobsQuery()
+  const { data, isError, error, refetch } = useGetAvailableJobsQuery({}, { refetchOnMountOrArgChange: 30 })
   const [ claimJob, results ] = useClaimJobMutation()
 
   useEffect(()=>{
     const {isSuccess, isError, error, reset} = results
     if(isSuccess){
       toast.success('Job has been claimed')
+      reset()
       return
     }
     if(isError){
-      toast.error(`An error occured: ${error.message}`)
+      toast.error(`An error occured: ${error.data.message}`)
       reset()
       return
     }
@@ -25,7 +26,7 @@ const AvailableJobs = () => {
 
   useEffect(() => {
     if(isError){
-      toast.error(`An error occured: ${error.message}`)
+      toast.error(`An error occured: ${error.data.message}`)
     }
   },[isError, error])
 
@@ -76,7 +77,7 @@ const AvailableJobs = () => {
               <ul className={style.jobInfo}>
                 <li className={style.jobName}>
                   <p>Name:</p> 
-                  <p>{job.name}</p>
+                  <p>{job.name}({job.id})</p>
                 </li>
                 <li>
                   <p>Time Left:</p>

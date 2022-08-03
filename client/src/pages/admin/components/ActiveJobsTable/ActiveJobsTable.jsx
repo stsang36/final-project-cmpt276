@@ -47,7 +47,7 @@ const ActiveJobsTable = () => {
       return
     }
     if(isError){
-      toast.error(`An error occured: ${error.message}`)
+      toast.error(`${error.data.message}`)
       reset()
       return
     }

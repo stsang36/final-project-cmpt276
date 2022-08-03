@@ -15,6 +15,8 @@ import SettingsContainer from 'pages/settings/SettingsContainer'
 import MyJobsContainer from 'pages/myJobs/components/MyJobsContainer'
 import UpdateJobModal from 'pages/job/components/UpdateJobModal'
 import RootPage from 'pages/RootPage'
+import PastJobs from 'pages/pastJobs/components/PastJobsContainer'
+import PastJobsContainer from 'pages/pastJobs/components/PastJobsContainer'
 
 const RoutesManager = () => {
   const location = useLocation()
@@ -31,6 +33,7 @@ const RoutesManager = () => {
           <Route path='admin' element={<AdminContainer />}/>
           <Route path='settings' element={<SettingsContainer/>}/>
           <Route path='myjobs' element={<MyJobsContainer />} />
+          <Route path='pastjobs' element={<PastJobsContainer />}/>
         </Route>
         <Route path="auth" element={<AuthContainer />}>
           <Route path='login' element={<LoginCard />} />

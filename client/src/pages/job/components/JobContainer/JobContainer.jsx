@@ -1,6 +1,6 @@
 import style from './style.module.css'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useDropJobMutation, useGetJobQuery, useClaimJobMutation, } from 'redux/slices/jobSlice'
+import { useDropJobMutation, useGetJobQuery } from 'redux/slices/jobSlice'
 import { useSelector, useDispatch } from 'react-redux'
 import moment from 'moment'
 import Button from 'common/components/Button'
@@ -26,8 +26,7 @@ const JobContainer = () => {
   const dispatch = useDispatch()
   const { id } = useParams()
   const navigate = useNavigate()
-  const { data, isLoading, isError, error } = useGetJobQuery({id})
-  const [ claimJob, claimResults ] = useClaimJobMutation()
+  const { data, isLoading, isError, error } = useGetJobQuery({id}, {refetchOnMountOrArgChange: true})
   const [ dropJob, dropResults ] = useDropJobMutation()
   const { user: { role, id: userId } } = useSelector(state => state.auth)
 
@@ -35,21 +34,6 @@ const JobContainer = () => {
     document.title = `Bytetools | Viewing Job ${data ? data.name : ''}`
     return () => document.title = 'Bytetools'
   },[])
-
-  useEffect(() => {
-    const { isSuccess, isError, error, reset } = claimResults
-    if(isSuccess){
-      toast.success('Claimed Job')
-      navigate('/dashboard')
-      return
-    }
-    if(isError){
-      console.log('here')
-      toast.error(`An error occured: ${error.message}`)
-      reset()
-      return
-    }
-  },[claimResults])
 
   useEffect(() => {
     const { isSuccess, isError, error, reset } = dropResults
@@ -237,13 +221,6 @@ const JobContainer = () => {
                   </motion.button>
                 </li>
               </ul>
-              {!data.claimed_userid && role !== 'client' && role !== 'admin' && (
-              <Button 
-                text='Claim Job'
-                className={style.claimBtn}
-                onClick={()=>claimJob({id})}
-              />
-            )}
             {data.claimed_userid && data.claimed_userid.id === userId && (
               <Button 
                 text='Drop Job'

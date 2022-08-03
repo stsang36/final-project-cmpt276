@@ -101,7 +101,7 @@ const getPastJobs = async(req, res) => {
   }
   const { id } = req.user
   const getPastJobsQuery = {
-    text: `SELECT * from job where ${role}_id = $1 AND claimed_userid != $1`,
+    text: `SELECT * from job where ${role}_id = $1 AND claimed_userid != $1 ORDER BY "deadline" DESC limit 20`,
     values: [id]
   }
   const result = await pool.query(getPastJobsQuery)

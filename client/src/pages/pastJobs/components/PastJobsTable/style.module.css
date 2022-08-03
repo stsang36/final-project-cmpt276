@@ -4,24 +4,6 @@
   flex-direction: column;
   overflow-y: auto;
   height: 100%;
-  align-self: stretch;
-  padding: 0rem 2rem;
-  gap: 1rem;
-}
-
-.header{
-  display: flex;
-  align-items: center;
-}
-
-.h1{
-  font-size: 1.3rem;
-  font-weight: 500;
-  padding: 0.5rem 2rem;
-}
-
-.p{
-  color: grey;
 }
 
 /* JOB TABLE */
@@ -29,7 +11,6 @@
   font-family: inherit;
   align-self: center;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  padding: 0.5rem 0;
 }
 
 .tableHeader{
@@ -54,9 +35,9 @@
   background: whitesmoke;
 }
 
-/* .tableRow:last-of-type{
+.tableRow:last-of-type{
   border-bottom: 1px solid lightgrey;
-} */
+}
 
 .tableRow td{
   padding: 0.5rem 1.5rem;

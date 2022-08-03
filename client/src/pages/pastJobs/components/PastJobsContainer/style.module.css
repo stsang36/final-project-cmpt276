@@ -2,18 +2,17 @@
 .main{
   height: 100%;
 }
-
 .h1{
   font-size: 2rem;
   font-weight: 500;
   padding: 2rem;
 }
 
-.p{
-  color: grey;
-}
-
 .header{
   display: flex;
   align-items: center;
+}
+
+.p{
+  color: grey;
 }

@@ -28,6 +28,7 @@
 .jobs{
   display: flex;
   gap: 1rem;
+  padding: 0.5rem;
   overflow-x: auto;
   max-width: 100%;
 }
@@ -40,10 +41,9 @@
   gap: 1.5rem;
   align-items: flex-start;
   min-width: 300px;
-  border: 1px solid grey;
   border-radius: 7px;
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  background: whitesmoke;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.4);
+  background: white;
 }
 
 .jobInfo{
@@ -69,7 +69,15 @@
 }
 
 .jobName{
-  font-size: 1.3rem;
+  padding-bottom: 1rem;;
+  display: flex;
+  align-items: center;
+}
+
+.jobName :last-child{
+  font-size: 1.2rem;
+  text-overflow: none;
+  text-decoration: underline;
 }
 
 .claimBtn{

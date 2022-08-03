@@ -8,17 +8,19 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { FaHatWizard, FaClipboardList } from 'react-icons/fa'
 import { MdCreateNewFolder } from 'react-icons/md'
-import { BsGearFill } from 'react-icons/bs'
+import { BsGearFill, BsClockFill } from 'react-icons/bs'
 import { IoRocketSharp } from 'react-icons/io5'
+import { apiSlice } from 'redux/slices/apiSlice'
 
 const Sidebar = () => {
   const { user } = useSelector(state => state.auth)
   const role = user ? user.role : null
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const handleClick = () => {
+  const handleLogout = () => {
     dispatch(logout())
     toast.success('Signed out')
+    dispatch(apiSlice.util.resetApiState())
     navigate('/auth/login')
   }
 
@@ -31,16 +33,27 @@ const Sidebar = () => {
         Bytetools
       </h1>
       <ul className={style.ul}>
-        {(role === 'transcriber' || role === 'reviwer') &&
-          <li className={style.li}>
-            <Link 
-              to='/dashboard'
-              className={style.a}
-            >
-              <IoRocketSharp className={style.icon}/>
-              Dashboard
-            </Link>
-          </li>
+        {(role === 'transcriber' || role === 'reviewer') &&
+          <>
+            <li className={style.li}>
+              <Link 
+                to='/dashboard'
+                className={style.a}
+              >
+                <IoRocketSharp className={style.icon}/>
+                Dashboard
+              </Link>
+            </li>
+            <li className={style.li}>
+              <Link 
+                to='/pastjobs'
+                className={style.a}
+              >
+                <BsClockFill className={style.icon}/>
+                Past Jobs
+              </Link>
+            </li>
+          </>
         }
         {role === 'admin' &&
           <li className={style.li}>
@@ -84,7 +97,7 @@ const Sidebar = () => {
       <Button 
         className={style.btn}
         text='Sign out'
-        onClick={handleClick}
+        onClick={handleLogout}
       />
     </nav>
   )

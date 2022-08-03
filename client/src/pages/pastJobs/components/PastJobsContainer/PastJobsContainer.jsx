@@ -1,26 +1,26 @@
 import style from './style.module.css'
 import Protect from 'common/components/Protect'
 import { useEffect } from 'react'
-import MyJobsTable from '../MyJobsTable'
+import PastJobsTable from '../PastJobsTable'
 
-const MyJobsContainer = () => {
+const PastJobsContainer = () => {
   useEffect(()=>{
-    document.title = 'Bytetools | My Jobs'
+    document.title = 'Bytetools | Past Jobs'
     return () => document.title = 'Bytetools'
   },[])
   return (
     <Protect>
       <main className={style.main}>
         <header className={style.header}>
-          <h1 className={style.h1}>My Jobs</h1>
-          <p  className={style.p}> ~ jobs you have created will be found here</p>
+          <h1 className={style.h1}>Past Jobs</h1>
+          <p className={style.p}> ~ the last 20 jobs that you have worked on will show up here </p>
         </header>
         <section>
-          <MyJobsTable/>
+          <PastJobsTable/>
         </section>
       </main>
     </Protect>
   )
 }
 
-export default MyJobsContainer
+export default PastJobsContainer
