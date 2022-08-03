@@ -118,7 +118,7 @@ const deletejob = async (req,res) => {
   }
   const { id: jobId  } = req.params
   const selectJobQuery = {
-    text: 'SELECT name, transcribe_fileid, review_fileid, complete_fileid, owner_id, transcriber_id, reviewer_id FROM job WHERE id = $1 limit 1',
+    text: 'SELECT name, transcribe_fileid, review_fileid, complete_fileid, owner_id, claimed_userid FROM job WHERE id = $1 limit 1',
     values: [jobId] 
   }
   const selectJobResult = await pool.query(selectJobQuery)
@@ -173,11 +173,11 @@ const deletejob = async (req,res) => {
   }
 
   if (claimed_userid) {
-    const calimedUser = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [claimed_userid])
-    const claimedDiscordNotify = calimedUser.rows[0].togglediscordpm
-
+    const claimedUser = await pool.query ('SELECT * FROM \"user\" WHERE id = $1', [claimed_userid])
+    const claimedDiscordNotify = claimedUser.rows[0].togglediscordpm
+    
     if (claimedDiscordNotify) {
-      const claimedDiscordId = calimedUser.rows[0].discordid
+      const claimedDiscordId = claimedUser.rows[0].discordid
 
       const deleteJobMessagePM = {
         title: `Your current job has been deleted by "${req.user.username}".`,
@@ -397,7 +397,7 @@ const updateJob = async(req, res) => {
 
     if(newStatus === 'complete') {
 
-      const result = await pool.query ('SELECT transcriber_id FROM \"user\" WHERE id = $1', [jobId])
+      const result = await pool.query ('SELECT transcriber_id FROM \"job\" WHERE id = $1', [jobId])
       const transcriberId = result.rows[0].transcriber_id
       const transcriber = await pool.query ('SELECT username FROM \"user\" WHERE id = $1', [transcriberId])
       const transcriberUsername = transcriber.rows[0].username
