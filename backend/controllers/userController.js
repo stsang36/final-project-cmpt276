@@ -1,7 +1,7 @@
 const { pool } = require('../config/pool.js')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { sendEmail } = require('../config/mail')
+const { sendResetEmail } = require('../config/mail')
 
 
 // @route:  GET /api/user/
@@ -234,7 +234,7 @@ const forgotPassword = async(req, res) => {
     }
 
     try {
-      await sendEmail(resetPasswordMsg)
+      await sendResetEmail(resetPasswordMsg)
     } catch(err) {
       res.status(400)
       throw new Error('Email failed to send')

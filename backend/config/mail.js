@@ -28,7 +28,7 @@ const sendEmail = async(data) => {
   }
 
   if (config.toggleEmailNotif) {
-    const completeJobMessage = {
+    const message = {
       to: data.to_email,
       from: config.emailDomain,
       templateId: data.templateId,
@@ -43,7 +43,7 @@ const sendEmail = async(data) => {
 
     try {
       mail.setApiKey(process.env.SENDGRID_API_KEY)
-      await mail.send(completeJobMessage)
+      await mail.send(message)
     } catch(err){
       throw new Error(err)
     }
@@ -55,8 +55,42 @@ const sendEmail = async(data) => {
   return;
 }
 
+const sendResetEmail = async(data) => {
+  if (!config) {
+    await fetchConfig()
+  }
+
+  if (!config.emailDomain) {
+    console.log('Email domain is not set, ignoring sending an email...')
+    return;
+  }
+
+  const resetMessage = {
+    to: data.to_email,
+    from: config.emailDomain,
+    templateId: data.templateId,
+    dynamicTemplateData:
+    {
+      subject : data.subject,
+      first_name: data.username,
+      targetLink: data.targetLink
+
+    }
+  }
+
+  try {
+    mail.setApiKey(process.env.SENDGRID_API_KEY)
+    await mail.send(resetMessage)
+  } catch(err){
+    throw new Error(err)
+  }
+
+  return;
+}
+
 
 module.exports = { 
   sendEmail,
-  fetchConfig
+  fetchConfig,
+  sendResetEmail
 }
