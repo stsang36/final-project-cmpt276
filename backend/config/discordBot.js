@@ -73,7 +73,7 @@ const sendToTranscribers = async (message) => {
 const sendToReviewers = async (message) => {
     
     if (!config.review_channel_id) {
-        await fetchChannelIds()
+        await fetchConfig()
     }
 
     if (!config.toggleNotification) {
